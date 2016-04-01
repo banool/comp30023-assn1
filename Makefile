@@ -2,7 +2,7 @@
 # Daniel Porteous
 # 2016
 
-OBJ     = simulation.o process.o
+OBJ     = simulation.o memory.o process.o 
 CC      = gcc
 EXE     = simulation
 CFLAGS  = -Wall
@@ -17,4 +17,5 @@ clean:
 usage: $(EXE)
 	./$(EXE)
 
-simulation.o: process.h Makefile
+simulation.o: memory.h process.h Makefile
+memory.o: process.h

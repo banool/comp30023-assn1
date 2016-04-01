@@ -1,11 +1,24 @@
-typedef struct Disk_process_s {
+typedef struct Process_s {
+    // These are the inital given data.
     int time_created;
     int process_id;
-    int memory_size;
+    int mem_size;
     int job_time;
-    struct Disk_process_s *next;
-} Disk_process;
+    
+    // These variables are only relevant when the process is in memory.
+    int start; // The start address inside Memory.
+    int end; // Derived from start + mem_size. Must be less than end of Memory.
+    int remaining_time; // Starts equal to job time.
 
-Disk_process *read_processes(char *target);
-Disk_process *create_Disk_process(int inp1, int inp2, int inp3, int inp4);
-void print_process_ids(Disk_process *head);
+    /*
+    ** We need to track both the next and previous process because
+    ** when we delete a process, we need to link the previous and next
+    ** process to each other.
+    */
+    struct Process_s *next;
+    struct Process_s *previous;
+} Process;
+
+Process *read_processes(char *target, int memsize);
+Process *create_process(int inp1, int inp2, int inp3, int inp4);
+void print_processes(Process *head);

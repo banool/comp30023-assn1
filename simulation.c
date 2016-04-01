@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "process.h"
+#include "memory.h"
 
 /* Extern declarations: */
 extern char *optarg;
@@ -66,8 +66,15 @@ int main(int argc, char** argv)
 	
 	// TODO insert error/validity checking for options.
 
-	Disk_process *disk_head = read_processes(target);
-	print_process_ids(disk_head);
+	Process *disk_head = read_processes(target, memsize);
+	if (disk_head == NULL) {
+		fprintf(stderr, "%s could not be read in properly, exiting...\n", target);
+		return -1;
+	}
+
+	print_processes(disk_head);
+
+	Memory *memory = create_Memory(memsize, disk_head);
 	
 	return 0;
 }
