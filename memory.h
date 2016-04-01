@@ -37,12 +37,16 @@ typedef struct Queue_s {
     ** ie (start + num_elements) % max_size
     */
     int start;
-    int num_elements;
+    int num_items;
     int max_size;
     // An array of pointers to processes (either in memory or on "disk").
     Process *queue[]; 
 } Queue;
 
-Memory *create_Memory(int memsize, Process *first_process);
+Memory *create_memory(int memsize);
+void memory_insert(Process *in);
 
+Queue *create_queue(int quantum);
+void queue_insert(Queue *q, Process *in);
+Process *queue_pop(Queue *q);
 

@@ -21,4 +21,4 @@ typedef struct Process_s {
 
 Process *read_processes(char *target, int memsize);
 Process *create_process(int inp1, int inp2, int inp3, int inp4);
-void print_processes(Process *head);
+void print_processes_ll(Process *head);

@@ -75,7 +75,6 @@ Process
 */
 Process
 *create_process(int inp1, int inp2, int inp3, int inp4) {
-    printf("hey\n");
     Process *p = malloc(sizeof(Process));
     assert(p);
 
@@ -93,6 +92,8 @@ Process
 
     p->next = NULL; // Will stay NULL if tail.
     p->previous = NULL; // Will stay NULL if head.
+    //diag
+    printf("Process created.\n");
     return p;
 }
 
@@ -106,7 +107,7 @@ Process
 }
 
 void
-print_processes(Process *head) {
+print_processes_ll(Process *head) {
 
     if (head == NULL) {
         printf("Error: Head is NULL.\n");
@@ -131,4 +132,9 @@ memory size = %3d, job time = %3d", i, curr->time_created,
         curr = curr->next;
         i += 1;
     }
+}
+
+void
+print_processes_arr(Process in[]) {
+
 }

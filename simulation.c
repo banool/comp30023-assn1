@@ -7,6 +7,8 @@
 extern char *optarg;
 
 void print_usage(char *program_name);
+void simulate(Process *disk_processes, Memory *memory);
+void step();
 
 int main(int argc, char** argv)
 {
@@ -72,9 +74,13 @@ int main(int argc, char** argv)
 		return -1;
 	}
 
-	print_processes(disk_head);
+	print_processes_ll(disk_head);
 
-	Memory *memory = create_Memory(memsize, disk_head);
+	//printf("queue element 0 id = %d\n", fcfs->queue[2]->process_id);
+
+	Memory *memory = create_memory(memsize);
+
+	simulate(disk_head, memory);
 	
 	return 0;
 }
@@ -85,4 +91,42 @@ print_usage(char *program_name) {
 	fprintf(stderr, "-f Name of input text file\n");
 	fprintf(stderr, "-a [fcfs | multi]\n");
 	fprintf(stderr, "-m Integer in mb greater than 0\n");
+}
+
+void
+simulate(Process *disk_processes, Memory *memory) {
+	int timer = 0;
+	int checked_future_processes;
+	Process *check;
+	Queue *fcfs = create_queue(-1);
+
+	Process *active = NULL;
+
+	while(timer < 100) {
+		printf("Time %d num_items = %d\n", timer, fcfs->num_items);
+		// Checking for any potential processes to be added to the queue.
+		checked_future_processes = 0;
+		// The latest disk process to check.
+		check = disk_processes;
+		while (!checked_future_processes) {
+			if (check->time_created == timer) {
+				queue_insert(fcfs, check);
+			}
+			// Testing if we are at the end of the list.
+			if (check->next == NULL) {
+				checked_future_processes = 1;
+			} else {
+				check = check->next;
+			}
+		}
+		if (active == NULL) {
+
+		}
+		timer += 1;
+	}
+} 
+
+void 
+step_fcfs(Process *disk_processes, Memory *memory, Process *active) {
+	// do shit
 }
