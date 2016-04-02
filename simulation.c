@@ -268,12 +268,14 @@ void simulate_multi(Process *disk_processes, Memory *memory) {
 			}
 		}
 
-
+		// fun fact. this line:
+		// if (active != NULL && remaining_quantum > 0) {
+		// enclosing this block makes it a fcfs alg instead.
 		// Checking if the current queue has expired its quantum.
 		if (remaining_quantum == 0) {
 			
 			// Move the active item onto the end of the next queue.
-			active->active = 0;
+			//active->active = 0;
 			Queue *next_queue = get_next_queue(curr_queue, q1, q2, q3);
 			// If this is true, we've looped back to the shortest quantum.
 			// We don't want our process to be looped back to the short
@@ -301,7 +303,6 @@ void simulate_multi(Process *disk_processes, Memory *memory) {
 			//curr_queue = q1;
 			//remaining_quantum = curr_queue->quantum;
 			active = NULL;
-			
 		}
 		
 
@@ -376,13 +377,13 @@ memory->num_holes, get_mem_usage(memory));
 		*/
 		if (active->remaining_time == 0) {
 			//diag
-			printf("active id: %d is dying\n", active->process_id);
+			//printf("active id: %d is dying\n", active->process_id);
 			// Discard the pointer, we don't need it as the process is done.
 			memory_remove(memory, active->process_id);
 			free_process(active);
 			free(active);
-			active = NULL;
-			
+			active = NULL;;
+			remaining_quantum = 1;
 			/* TODO insert a way to check if we're done. num_items in
 			   queue being 0 might not be the best because another item
 			   might come in while the queue is empty. check by future
