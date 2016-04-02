@@ -16,6 +16,10 @@
 
 #include "process.h"
 
+#define Q1_LENGTH 2
+#define Q2_LENGTH 4
+#define Q3_LENGTH 8
+
 typedef struct Memory_s {
     int start; // Most likely 0.
     int end; // Will be the given memsize;
@@ -49,8 +53,10 @@ int memory_insert(Memory *mem, Process *in);
 Process *memory_remove_largest(Memory *mem);
 Process *memory_remove(Memory *mem, int process_id);
 void memory_count_holes(Memory *mem);
+int get_mem_usage(Memory *mem);
 
 Queue *create_queue(int quantum);
 void queue_insert(Queue *q, Process *in);
 Process *queue_pop(Queue *q);
+Queue *get_next_queue(Queue *curr_queue, Queue *q1, Queue *q2, Queue *q3);
 

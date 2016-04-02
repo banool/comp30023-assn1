@@ -5,7 +5,10 @@
 //diag we dont need this, just here for printf
 #include <stdio.h>
 // TODO Justify this choice. It is 3 current for testing purposes.
-#define BASE_QUEUE_SIZE 3
+#define BASE_QUEUE_SIZE 6
+//TODO a smaller base queue size makes it not correctly track the start of
+// the queue after it allocates more size for itself. Perhaps using
+// incorrect logic to "math out" the start of the queue. 
 
 /*
 ** Creates the "memory" as it were. Must be made with a process
@@ -28,6 +31,7 @@ Memory
 // Returns 1 on success, 0 on failure. If failure we use memory_insert_full.
 int
 memory_insert(Memory *mem, Process *in) {
+    //printf("inserting to memorry\n");
     
     // If there are no items in memory yet.
     if (mem->processes == NULL) {
@@ -46,7 +50,7 @@ memory_insert(Memory *mem, Process *in) {
 
     Process *curr = mem->processes;
     // Checking for space between start of memory and first process.
-    if ((mem->start + in->mem_size) < curr->start - 2) {
+    if ((mem->start + in->mem_size) < curr->start) {
         in->start = 0;
         in->end = in->mem_size;
 
@@ -75,8 +79,11 @@ memory_insert(Memory *mem, Process *in) {
             in->in_mem = 1;
             return 1;
         }
+        curr = curr->next;
     }
 
+    //diag
+    //printf("curr end: %d\n", curr->end);
     // Checking for space between last process and end.
     if ((curr->end + in->mem_size) < (mem->end - 2)) {
         curr->next = in;
@@ -101,6 +108,9 @@ memory_insert(Memory *mem, Process *in) {
 // item in memory and then passes it to memory_remove() to remove it.
 Process
 *memory_remove_largest(Memory *mem) {
+    
+    //diag
+    //printf("removing largest\n");
 
     Process *curr = mem->processes;
 
@@ -111,7 +121,10 @@ Process
         if (curr->next->mem_size > curr->mem_size) {
             id_biggest = curr->next->process_id;
         }
+        curr = curr->next;
     }
+    //diag
+    //printf("largest iddasdsad: %d\n", id_biggest);
     return memory_remove(mem, id_biggest);
 }
 
@@ -133,13 +146,17 @@ Process
     // If so, we free/remove it and reset mem->processes to NULL.
     if (mem->processes->next == NULL) {
         Process *ret = mem->processes;
+        ret->active = 0;
+        ret->in_mem = 0;
         mem->processes = NULL;
+        mem->num_processes -= 1;
         return ret;
     }
 
     // Checking if the process to remove is after the 1st element.
-    int final = 0;
-    while(!final) {
+    while(1) {
+        //diag
+        //printf("entered here tho\n");
         if (curr->process_id == process_id) {
             curr->active = 0;
             curr->in_mem = 0;
@@ -150,19 +167,20 @@ Process
             if (curr->next != NULL) {
                 curr->next->prev = curr->prev;
             }
+            mem->num_processes -= 1;
             return curr;
         }
 
         curr = curr->next;
 
         // Checking for the end of the linked list.        
-        if(curr->next == NULL) {
-            final = 1;
-        }
+        /*if(curr->next == NULL) {
+            break;
+        }*/
     }
     
-    mem->num_processes -= 1;
     // Shouldn't get here.
+    printf("you got here memed\n");
     return NULL;
 }
 
@@ -180,27 +198,18 @@ void memory_count_holes(Memory *mem) {
         holes +=1;
     }
     
-    int final = 0;
-    while(!final) {
+    while(1) {
         // printf("start: %d, end %d\n", curr->start, curr->end); //diag
-        // Safety for if there is only one item.
+        // Checking for the end of the list.
         if(curr->next == NULL) 
             break;
         // Checking for holes up until the last process.
         if (curr->end < curr->next->start - 1) 
         {
             holes +=1;
-            printf("memes\n");
         }
 
         curr = curr->next;
-
-        // Checking for the end of the linked list. 
-        // TODO Yes, this could be done by just checking for this 
-        // in the while loop I know.
-        if(curr->next->next == NULL) {
-            final = 1;
-        }
     }
     
     // Checking for a hole between the last process and the end.
@@ -212,6 +221,26 @@ void memory_count_holes(Memory *mem) {
     }
 
     mem->num_holes = holes;
+}
+
+int
+get_mem_usage(Memory *mem) {
+    int total_usage = 0;
+
+    Process *curr = mem->processes;
+    if (curr == NULL) {
+        return 0;
+    }
+
+    while(1) {
+        total_usage += curr->mem_size;
+        if (curr->next == NULL) {
+            break;
+        }
+        curr = curr->next;
+    }
+    
+    return ((int)(((double)total_usage/mem->end)*100));
 }
 
 Queue
@@ -260,4 +289,26 @@ Process
     //printf("New start index: %d\n", new_start);
     q->start = new_start;
     return ret;
+}
+
+
+// TODO note how this is n't very extensible, and an array which holds
+// a pointer to each queue would be much mroe efficient.
+Queue
+*get_next_queue(Queue *curr_queue, Queue *q1, Queue *q2, Queue *q3) {
+    switch(curr_queue->quantum) {
+        case Q1_LENGTH:
+            return q2;
+            break;
+        case Q2_LENGTH:
+            return q3;
+            break;
+        case Q3_LENGTH:
+            return q1;
+            break;
+        // Should be impossible to get here.
+        default:
+            return NULL;
+            break;
+    }
 }
