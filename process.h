@@ -9,6 +9,8 @@ typedef struct Process_s {
     int start; // The start address inside Memory.
     int end; // Derived from start + mem_size. Must be less than end of Memory.
     int remaining_time; // Starts equal to job time.
+    int active; // Bool representing if the Process is being actively run.
+    int in_mem; // Bool representing if the Process is loaded into memory.
 
     /*
     ** We need to track both the next and previous process because
@@ -16,9 +18,10 @@ typedef struct Process_s {
     ** process to each other.
     */
     struct Process_s *next;
-    struct Process_s *previous;
+    struct Process_s *prev;
 } Process;
 
 Process *read_processes(char *target, int memsize);
 Process *create_process(int inp1, int inp2, int inp3, int inp4);
+void free_process(Process *p);
 void print_processes_ll(Process *head);

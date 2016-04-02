@@ -20,6 +20,7 @@ typedef struct Memory_s {
     int start; // Most likely 0.
     int end; // Will be the given memsize;
     int num_processes;
+    int num_holes;
     // Just a pointer to the first process in the linked list.
     Process *processes;
 } Memory;
@@ -43,8 +44,11 @@ typedef struct Queue_s {
     Process *queue[]; 
 } Queue;
 
-Memory *create_memory(int memsize);
-void memory_insert(Process *in);
+Memory *create_memory(int mem_size);
+int memory_insert(Memory *mem, Process *in);
+Process *memory_remove_largest(Memory *mem);
+Process *memory_remove(Memory *mem, int process_id);
+void memory_count_holes(Memory *mem);
 
 Queue *create_queue(int quantum);
 void queue_insert(Queue *q, Process *in);

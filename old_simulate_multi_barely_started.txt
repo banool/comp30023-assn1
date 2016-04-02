@@ -1,0 +1,98 @@
+void
+simulate_multi(Process *disk_processes, Memory *memory) {
+	int timer = 0;
+	int checked_future_processes;
+	Process *check = disk_processes;
+
+	Queue *q1 = create_queue(2);
+	Queue *q2 = create_queue(4);
+	Queue *q3 = create_queue(8);
+
+	Process *active = NULL;
+
+	while(1) {
+		//diag
+		//printf("Time %d num_items = %d\n", timer, fcfs->num_items);
+		
+
+		// Checking for any potential processes to be added to the queue.
+		checked_future_processes = 0;
+		if (check == NULL) 
+			checked_future_processes = 1;
+		while (!checked_future_processes) {
+			/*
+			** Is == and not >= because this would pick up processes that
+			** have already been queued up once and then moved back to disk.
+			** If these were triggered by this, then they would be duplicated
+			** in the queue which is not what we want at all.
+			*/
+			if (check->time_created == timer) {
+				queue_insert(q1, check);
+				if (check->next != NULL) {
+					disk_processes = check->next;
+				} else {
+					disk_processes = NULL;
+				}
+			}
+			// Testing if we are at the end of the list.
+			if (check->next == NULL) {
+				checked_future_processes = 1;
+			} else {
+				check = check->next;
+			}
+		}
+
+		/*
+		** Deciding which process to run. If there isn't an active process
+		** we will pop the front of the queue and move it into memory/
+		*/
+		if (active == NULL) {
+			active = queue_pop(q1);
+			active->active = 1;
+
+			// Checking if the process is in memory already. If not:
+			if(!active->in_mem) {
+			// Trying to insert the process into memory.
+			// If this fails, it calls the function to do so after
+			// freeing space space in memory first.
+				if (!memory_insert(memory, active))
+					memory_insert_full(memory, active, disk_processes);
+			}
+
+			memory_count_holes(memory);
+			printf("time %d, %d running, numprocesses=%d, numholes=%d,\
+ memusage=%d%%\n", timer, active->process_id, memory->num_processes,
+memory->num_holes, (int)(((double)active->mem_size/memory->end)*100));
+		}
+		
+		active->remaining_time -= 1;
+
+		/*
+		** If the active process hits finishes executing, we call the
+		** function that finds it in memory, removes it and relinks the
+		** neighbouring processes. We then free it and set active to NULL.
+		*/
+		if (active->remaining_time == 0) {
+			// Discard the pointer, we don't need it as the process is done.
+			memory_remove(memory, active->process_id);
+			free_process(active);
+			free(active);
+			active = NULL;
+			/* TODO insert a way to check if we're done. num_items in
+			   queue being 0 might not be the best because another item
+			   might come in while the queue is empty. check by future
+			   processes being empty or something? */
+			if (!q1->num_items) {
+				// printf("death\n"); //diag
+				timer += 1;
+				break;
+			}
+		}
+
+		timer += 1;
+		check = disk_processes;
+	}
+
+	printf("time %d, simulation finished.\n", timer);
+}
+

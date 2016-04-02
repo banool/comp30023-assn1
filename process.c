@@ -1,23 +1,31 @@
 /*
- * This function reads the input file and outputs an array
- * of processes as if they were on disk. We can then treat
- * this array is if it were current and future processes on disk.
- * 
- * Returns pointer to the head of the linked list of disk processes.
- * 
- * Initial code based off code from Andrew Turpin, writen
- * Wed 29 Apr 2015 06:32:22 AEST
- */
+** This function reads the input file and outputs an array
+** of processes as if they were on disk. We can then treat
+** this array is if it were current and future processes on disk.
+** 
+** Returns pointer to the head of the linked list of disk processes.
+** 
+** Initial code based off code from Andrew Turpin, writen
+** Wed 29 Apr 2015 06:32:22 AEST
+*/
 
 #include <stdio.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "process.h"
 
 #define BUFFSIZE 32
 
 Process
 *read_processes(char *target, int memsize) {
+
+    // This line confirms if the target file exists.
+    if(access(target, R_OK ) == -1 ) {
+        fprintf(stderr, "File could not be found.\n");
+        return NULL;
+    }
+
 
     FILE *fp;
     fp = fopen(target, "r");
@@ -43,18 +51,18 @@ Process
             return NULL;
         }
 
-        if (inp3 >= memsize) {
+        if (inp3 > memsize) {
             fprintf(stderr, "A process is too large for memory.\n");
             return NULL;
         }
 
         if (first) {
             head = create_process(inp1, inp2, inp3, inp4);
-            head->previous = NULL;
+            head->prev = NULL;
             recent = head;
         } else {
             recent->next = create_process(inp1, inp2, inp3, inp4);
-            recent->next->previous = recent;
+            recent->next->prev = recent;
             recent = recent->next;
         }
         
@@ -89,11 +97,15 @@ Process
     p->start = -1;
     p->end = -1;
     p->remaining_time = inp4; // Just the job_time to start with.
+    p->active = 0;
+    p->in_mem = 0;
 
+    p->next = malloc(sizeof(Process*));
     p->next = NULL; // Will stay NULL if tail.
-    p->previous = NULL; // Will stay NULL if head.
+    p->prev = malloc(sizeof(Process*));
+    p->prev = NULL; // Will stay NULL if head.
     //diag
-    printf("Process created.\n");
+    //printf("Process created.\n");
     return p;
 }
 
@@ -106,11 +118,20 @@ Process
     
 }
 
+void free_process(Process *p) {
+    p->next = NULL;
+    p->prev = NULL;
+    free(p->next);
+    free(p->prev);
+    //TODO why does this line not work?
+    // free(p);
+}
+
 void
 print_processes_ll(Process *head) {
 
     if (head == NULL) {
-        printf("Error: Head is NULL.\n");
+        fprintf(stderr, "Error: Head is NULL.\n");
         return;
     }
 
@@ -121,8 +142,8 @@ print_processes_ll(Process *head) {
         printf("Element %2d: time created = %2d, current->id = %2d, \
 memory size = %3d, job time = %3d", i, curr->time_created, 
             curr->process_id, curr->mem_size, curr->job_time);
-        if (curr-> previous != NULL)
-            printf(", Previous id = %d\n", curr->previous->process_id);
+        if (curr-> prev != NULL)
+            printf(", prev id = %d\n", curr->prev->process_id);
         else {
             printf("\n");
         }
