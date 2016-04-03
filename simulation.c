@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "memory.h"
+#include "queue.h"
 
 #define FCFS  "fcfs"
 #define MULTI "multi"
