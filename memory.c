@@ -28,11 +28,9 @@ Memory
     return mem;
 }
 
-// Returns 1 on success, 0 on failure. If failure we use memory_insert_full.
-int
-memory_insert(Memory *mem, Process *in) {
-    //printf("inserting to memorry id %d\n", in->process_id);
-    
+// Returns 1 on success, 0 on failure. If failure we use memory_remove_largest.
+int memory_insert(Memory *mem, Process *in)
+{
     // If there are no items in memory yet.
     if (mem->processes == NULL) {
         mem->processes = in;
@@ -44,10 +42,7 @@ memory_insert(Memory *mem, Process *in) {
 
         mem->num_processes += 1;
         in->in_mem = 1;
-        //diag
-        //printf("hey in process id %d\n", in->process_id);
         return 1;
-
     }
 
     Process *curr = mem->processes;
@@ -84,11 +79,8 @@ memory_insert(Memory *mem, Process *in) {
         curr = curr->next;
     }
 
-    //diag
-    //printf("curr end: %d\n", curr->end);
     // Checking for space between last process and end.
     if ((curr->end + in->mem_size) <= (mem->end)) {
-        //printf("inserting between last and end\n");
         curr->next = in;
         in->prev = curr;
         in->next = NULL;
@@ -109,12 +101,8 @@ memory_insert(Memory *mem, Process *in) {
 // TODO EXPAND this pre much is used when it's been found that there
 // isn't enough space in memory. This function finds the id of the largest
 // item in memory and then passes it to memory_remove() to remove it.
-Process
-*memory_remove_largest(Memory *mem) {
-    
-    //diag
-    //printf("removing largest\n");
-
+Process *memory_remove_largest(Memory *mem)
+{
     Process *curr = mem->processes;
 
     // Checking for space between each process.
@@ -126,11 +114,8 @@ Process
             id_biggest = curr->next->process_id;
             biggest = curr->next->mem_size;
         }
-        //printf("curr target: %d\n", id_biggest);
         curr = curr->next;
     }
-    //diag
-    //printf("removing largest iddasdsad: %d\n", id_biggest);
     return memory_remove(mem, id_biggest);
 }
 
@@ -144,8 +129,8 @@ Process
 **    else but it hasn't completed. As such we need to pointer so we 
 **    can re-add it to disk.
 */
-Process
-*memory_remove(Memory *mem, int process_id) {
+Process *memory_remove(Memory *mem, int process_id)
+{
     Process *curr = mem->processes;
 
     // Checking if there was only one item in memory.
@@ -157,18 +142,13 @@ Process
         ret->in_mem = 0;
         mem->processes = NULL;
         mem->num_processes -= 1;
-        //printf("mem is now empty\n");
         return ret;
     }
 
     // Checking if the process to remove is after the 1st element.
     int first = 1;
     while(1) {
-        //diag
-        //printf("entered here tho\n");
-        //printf("target %d and curr %d\n", process_id, curr->process_id);
         if (curr->process_id == process_id) {
-            
             curr->active = 0;
             curr->in_mem = 0;
             // Linking the neighbouring processes.
@@ -183,23 +163,15 @@ Process
                 mem->processes = curr->next;
             return curr;
         }
-
         curr = curr->next;
         first = 0;
-
-        // Checking for the end of the linked list.        
-        //if(curr->next == NULL) {
-        //    break;
-        //}
     }
-    
     // Shouldn't get here.
-    //printf("you got here memed\n");
     return NULL;
 }
 
-void 
-memory_count_holes(Memory *mem) {
+void memory_count_holes(Memory *mem)
+{
     int holes = 0;
     
     Process *curr = mem->processes;
@@ -214,7 +186,6 @@ memory_count_holes(Memory *mem) {
     }
     
     while(1) {
-        // printf("start: %d, end %d\n", curr->start, curr->end); //diag
         // Checking for the end of the list.
         if(curr->next == NULL) 
             break;
@@ -223,23 +194,19 @@ memory_count_holes(Memory *mem) {
         {
             holes +=1;
         }
-
         curr = curr->next;
     }
     
     // Checking for a hole between the last process and the end.
-    if (curr->end < mem->end)
-    {
-        //diag once done with make this a non-bracketed single statement.
-        //printf("curr end: %d and mem end %d\n", curr->end, mem->end);
+    if (curr->end < mem->end) {
         holes +=1;
     }
 
     mem->num_holes = holes;
 }
 
-int
-get_mem_usage(Memory *mem) {
+int get_mem_usage(Memory *mem)
+{
     int total_usage = 0;
 
     Process *curr = mem->processes;
@@ -258,8 +225,8 @@ get_mem_usage(Memory *mem) {
     return ((int)(((double)total_usage/mem->end)*100));
 }
 
-Queue
-*create_queue(int quantum) {
+Queue *create_queue(int quantum)
+{
     Queue *q;
     /* 
     ** This odd malloc is due to how flexible/dynamic array members work
@@ -276,44 +243,44 @@ Queue
     return q;
 }
 
-void
-queue_insert(Queue *q, Process *in) {
+void queue_insert(Queue *q, Process *in)
+{
     // Making sure the queue has enough space for the new element.
+    // If not we double the queue size.
+    // TODO this doesn't work. What if we made a new queue and copied
+    // all items into the start of the new queue.
     if (q->max_size <= q->num_items) {
-        //diag
-        printf("Increasing queue max size.\n");
         q = realloc(q, sizeof(Queue) + sizeof(Process*) * q->max_size * 2);
         assert(q);
         q->max_size *= 2;
     }
     int next_index = (q->start + q->num_items) % q->max_size;
-    //diag
-    //printf("Index for insert of process %d: %d\n", in->process_id, next_index);
     q->queue[next_index] = in;
     q->num_items += 1;
-    
 }
 
-Process
-*queue_pop(Queue *q) {
+Process *queue_pop(Queue *q)
+{
     Process *ret = q->queue[q->start];
     q->queue[q->start] = NULL;
-    //diag
-    //printf("%d pre current number of items: %d\n", q->quantum, q->num_items);
-    q->num_items -= 1;
-    //printf("%d post current number of items: %d\n", q->quantum, q->num_items);
     int new_start = (q->start + 1) % q->max_size;
-    //diag
-    //printf("New start index: %d\n", new_start);
     q->start = new_start;
+    
+    q->num_items -= 1;
     return ret;
 }
 
 
-// TODO note how this is n't very extensible, and an array which holds
-// a pointer to each queue would be much mroe efficient.
-Queue
-*get_next_queue(Queue *curr_queue, Queue *q1, Queue *q2, Queue *q3) {
+/*
+** This function returns which queue is next for purposes of moving a process
+** down in the queue order.
+**
+** Note that this solution isn't very extensible, and an array which holds
+** a pointer to each queue would be much more efficient. However in a system 
+** with a small, constant number of queues, this works fine.
+*/
+Queue *get_next_queue(Queue *curr_queue, Queue *q1, Queue *q2, Queue *q3)
+{
     switch(curr_queue->quantum) {
         case Q1_LENGTH:
             return q2;
@@ -322,7 +289,8 @@ Queue
             return q3;
             break;
         case Q3_LENGTH:
-            return q1;
+            // Just put it back on q3 as it is the last queue.
+            return q3;
             break;
         // Should be impossible to get here.
         default:
@@ -331,8 +299,8 @@ Queue
     }
 }
 
-void
-print_mem_items(Memory *mem) {
+void print_mem_items(Memory *mem)
+{
     printf("Processes in memory:\n");
     if (mem->processes == NULL) {
         printf("  No processes in memory.\n");

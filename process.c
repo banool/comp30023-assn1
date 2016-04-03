@@ -17,8 +17,8 @@
 
 #define BUFFSIZE 32
 
-Process
-*read_processes(char *target, int memsize) {
+Process *read_processes(char *target, int memsize)
+{
 
     // This line confirms if the target file exists.
     if(access(target, R_OK ) == -1 ) {
@@ -36,10 +36,9 @@ Process
     int first = 1;
     Process *head;
 
-    /* Keeping track of the Process most recently created
-       so that we can point it to the next one we create. */
+    // Keeping track of the most recently created process
+    // so that we can point it to the next one we create.
     Process *recent;
-
 
     while ((fgets(buff, BUFFSIZE, fp) != NULL)) {
         // time_created, process_id, memory_size, job_time;
@@ -79,10 +78,11 @@ Process
 ** function reads in the initial input data, as these processes will
 ** then be loaded "on to disk", meaning a queue that acts as if the
 ** swap space on disk.
+** 
 ** Parameters are: time_created, process_id, memory_size, job_time
 */
-Process
-*create_process(int inp1, int inp2, int inp3, int inp4) {
+Process *create_process(int inp1, int inp2, int inp3, int inp4)
+{
     Process *p = malloc(sizeof(Process));
     assert(p);
 
@@ -101,34 +101,23 @@ Process
     p->in_mem = 0;
 
     p->next = malloc(sizeof(Process*));
-    p->next = NULL; // Will stay NULL if tail.
+    p->next = NULL; // Will already be NULL if tail.
     p->prev = malloc(sizeof(Process*));
-    p->prev = NULL; // Will stay NULL if head.
-    //diag
-    //printf("Process created.\n");
+    p->prev = NULL; // Will already be NULL if head.
+
     return p;
 }
 
-// TODO this might be redundant.
-Process
-*duplicate_process(Process *in) {
-    Process *out = create_process(in->time_created, in->process_id, 
-        in->mem_size, in->job_time);
-    return out;
-    
-}
-
-void free_process(Process *p) {
+void free_process(Process *p)
+{
     p->next = NULL;
     p->prev = NULL;
     free(p->next);
     free(p->prev);
-    //TODO why does this line not work?
-    // free(p);
 }
 
-void
-print_processes_ll(Process *head) {
+void print_processes_ll(Process *head)
+{
 
     if (head == NULL) {
         fprintf(stderr, "Error: Head is NULL.\n");
@@ -155,7 +144,3 @@ memory size = %3d, job time = %3d", i, curr->time_created,
     }
 }
 
-void
-print_processes_arr(Process in[]) {
-
-}
