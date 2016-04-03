@@ -283,7 +283,10 @@ Process
 *queue_pop(Queue *q) {
     Process *ret = q->queue[q->start];
     q->queue[q->start] = NULL;
+    //diag
+    //printf("%d pre current number of items: %d\n", q->quantum, q->num_items);
     q->num_items -= 1;
+    //printf("%d post current number of items: %d\n", q->quantum, q->num_items);
     int new_start = (q->start + 1) % q->max_size;
     //diag
     //printf("New start index: %d\n", new_start);

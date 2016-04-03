@@ -234,7 +234,7 @@ void simulate_multi(Process *disk_processes, Memory *memory) {
 
 	while(1) {
 		//diag
-		//printf("Time %d num_items = %d\n", timer, q1->num_items);
+		//printf("Time %d q3 num_items = %d\n", timer, q3->num_items);
 		
 		//printf("curr q: %d", curr_queue->quantum);
 		//diag
@@ -273,19 +273,20 @@ void simulate_multi(Process *disk_processes, Memory *memory) {
 		// enclosing this block makes it a fcfs alg instead.
 		// Checking if the current queue has expired its quantum.
 		if (remaining_quantum == 0) {
-			
 			// Move the active item onto the end of the next queue.
 			//active->active = 0;
 			Queue *next_queue = get_next_queue(curr_queue, q1, q2, q3);
 			// If this is true, we've looped back to the shortest quantum.
-			// We don't want our process to be looped back to the short
+			// We don't want our process to be looped back into the short
 			// quantum, so we just leave it in the last queue.
-			if (next_queue->quantum == 2) { 
-				queue_insert(q3, active);
-			} else {
-				// In this case the active item must've just been in q1 or q2.
-				// As such, we move it down into the next queue (q2 or q3).
-				queue_insert(next_queue, active);
+			if (active != NULL) {
+				if (next_queue->quantum == Q1_LENGTH) { 
+					queue_insert(q3, active);
+				} else {
+					// In this case the active item must've just been in q1 or q2.
+					// As such, we move it down into the next queue (q2 or q3).
+					queue_insert(next_queue, active);
+				}
 			}
 			
 			// Round robin into the next queue for this iteration.
@@ -305,15 +306,17 @@ void simulate_multi(Process *disk_processes, Memory *memory) {
 			active = NULL;
 		}
 		
-
+		//diag
+		//printf("mem usage: %d\n", get_mem_usage(memory));
 		/*
 		** Deciding which process to run. If there isn't an active process
 		** we will pop the front of the queue and move it into memory/
 		*/
 		if (active == NULL) {
 			//diag
-			//printf("num items in queue: %d\n", curr_queue->num_items);
+			//printf("quantum: %d  num items in queue: %d\n", curr_queue->quantum, curr_queue->num_items);
 			active = queue_pop(curr_queue);
+			// TODO when items pop from q3 the num items isnt decreasing.
 			active->active = 1;
 
 			// Checking if the process is in memory already. If not:
@@ -382,7 +385,7 @@ memory->num_holes, get_mem_usage(memory));
 			memory_remove(memory, active->process_id);
 			free_process(active);
 			free(active);
-			active = NULL;;
+			active = NULL;
 			remaining_quantum = 1;
 			/* TODO insert a way to check if we're done. num_items in
 			   queue being 0 might not be the best because another item
