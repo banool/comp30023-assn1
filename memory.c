@@ -38,7 +38,7 @@ int memory_insert(Memory *mem, Process *in)
 
     Process *curr = mem->processes;
     // Checking for space between start of memory and first process.
-    if ((mem->start + in->mem_size) < curr->start) {
+    if ((mem->start + in->mem_size) <= curr->start) {
         in->start = 0;
         in->end = in->mem_size;
 
@@ -54,13 +54,13 @@ int memory_insert(Memory *mem, Process *in)
     // Checking for space between each process.
     while (curr->next != NULL) {
         // Checking for a large enough gap.
-        if ((curr->end + in->mem_size) < curr->next->start) {
+        if ((curr->end + in->mem_size) <= curr->next->start) {
             curr->next->prev = in;
             in->next = curr->next;
             curr->next = in;
             in->prev = curr;
 
-            in->start = curr->end + 1;
+            in->start = curr->end;
             in->end = in->start + in->mem_size;
 
             mem->num_processes += 1;
@@ -76,7 +76,7 @@ int memory_insert(Memory *mem, Process *in)
         in->prev = curr;
         in->next = NULL;
 
-        in->start = curr->end + 1;
+        in->start = curr->end;
         in->end = in->start + in->mem_size;
 
         mem->num_processes += 1;
@@ -181,7 +181,7 @@ void memory_count_holes(Memory *mem)
         if(curr->next == NULL) 
             break;
         // Checking for holes up until the last process.
-        if (curr->end < curr->next->start - 1) 
+        if (curr->end < curr->next->start) 
         {
             holes +=1;
         }
