@@ -1,3 +1,11 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+#include <unistd.h>
+#include "process.h"
+
+#define BUFFSIZE 32
+
 /*
 ** This function reads the input file and outputs an array
 ** of processes as if they were on disk. We can then treat
@@ -8,29 +16,13 @@
 ** Initial code based off code from Andrew Turpin, writen
 ** Wed 29 Apr 2015 06:32:22 AEST
 */
-
-#include <stdio.h>
-#include <assert.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include "process.h"
-
-#define BUFFSIZE 32
-
 Process *read_processes(char *target, int memsize)
 {
-
     // This line confirms if the target file exists.
     if(access(target, R_OK ) == -1 ) {
         fprintf(stderr, "File could not be found.\n");
         return NULL;
     }
-
-
-    FILE *fp;
-    fp = fopen(target, "r");
-
-    char buff[BUFFSIZE];
 
     // Saving the pointer to the first Process created.
     int first = 1;
@@ -39,6 +31,11 @@ Process *read_processes(char *target, int memsize)
     // Keeping track of the most recently created process
     // so that we can point it to the next one we create.
     Process *recent;
+
+    FILE *fp;
+    fp = fopen(target, "r");
+
+    char buff[BUFFSIZE];
 
     while ((fgets(buff, BUFFSIZE, fp) != NULL)) {
         // time_created, process_id, memory_size, job_time;
@@ -108,6 +105,9 @@ Process *create_process(int inp1, int inp2, int inp3, int inp4)
     return p;
 }
 
+/*
+** Frees a process. This is called once a process finishes executing entirely.
+*/
 void free_process(Process *p)
 {
     p->next = NULL;
@@ -115,32 +115,3 @@ void free_process(Process *p)
     free(p->next);
     free(p->prev);
 }
-
-void print_processes_ll(Process *head)
-{
-
-    if (head == NULL) {
-        fprintf(stderr, "Error: Head is NULL.\n");
-        return;
-    }
-
-    Process *curr = head;
-
-    int i = 0;
-    while(1) {
-        printf("Element %2d: time created = %2d, current->id = %2d, \
-memory size = %3d, job time = %3d", i, curr->time_created, 
-            curr->process_id, curr->mem_size, curr->job_time);
-        if (curr-> prev != NULL)
-            printf(", prev id = %d\n", curr->prev->process_id);
-        else {
-            printf("\n");
-        }
-        if (curr->next == NULL) {
-            break;
-        }
-        curr = curr->next;
-        i += 1;
-    }
-}
-

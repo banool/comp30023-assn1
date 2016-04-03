@@ -2,19 +2,16 @@
 #include <assert.h>
 #include "memory.h"
 
-//diag we dont need this, just here for printf
-#include <stdio.h>
-// TODO Justify this choice. It is 3 current for testing purposes.
+// TODO Justify this choice. It is 30 current for testing purposes.
 #define BASE_QUEUE_SIZE 30
 //TODO a smaller base queue size makes it not correctly track the start of
 // the queue after it allocates more size for itself. Perhaps using
 // incorrect logic to "math out" the start of the queue. 
 
 /*
-** Creates the "memory" as it were. Must be made with a process
-** given to it first. This isn't a huge concern because we don't
-** need Memory until a process is spawned, and a process is always
-** spawned at time 0. TODO REVISE THIS. YOU NOW DONT NEED A PROCESS
+** Creates the "memory" as it were. Holes aren't formally tracked but
+** are easily implied from the space between each process (or between
+** a process and the start/end of memory).
 */
 Memory
 *create_memory(int mem_size) {
