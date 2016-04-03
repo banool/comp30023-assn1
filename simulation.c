@@ -74,6 +74,19 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
+	//diag
+	if (disk_head != NULL) {
+		Process *curr = disk_head;
+		printf("On disk: %d ", curr);
+		while (curr->next != NULL) {
+			printf("%d ", curr->next->process_id);
+			curr = curr->next;
+		}
+		printf("\n");
+	} else {
+		printf("On disk: None\n");
+	}
+
 	Memory *memory = create_memory(memsize);
 
 	simulate(disk_head, memory, alg);
@@ -88,7 +101,25 @@ void print_usage(char *program_name)
 	fprintf(stderr, "-a [fcfs | multi]\n");
 	fprintf(stderr, "-m Integer in mb greater than 0\n");
 }
+void print_mem_items(Memory *mem)
+{
+    printf("Processes in memory:\n");
+    if (mem->processes == NULL) {
+        printf("  No processes in memory.\n");
+        return;
+    }
 
+    Process *curr = mem->processes;
+
+    while(1) {
+        printf("  id: %d start: %d end: %d size: %d\n", 
+            curr->process_id, curr->start, curr->end, (curr->end-curr->start));
+        if (curr->next == NULL) {
+            break;
+        }
+        curr = curr->next;
+    }
+}
 
 void simulate(Process *disk_processes, Memory *memory, char *alg)
 {
@@ -116,6 +147,22 @@ void simulate(Process *disk_processes, Memory *memory, char *alg)
 	Process *active = NULL;
 
 	while(1) {
+		printf("timer: %d -- ", timer);
+		print_mem_items(memory);
+
+		check = disk_processes;
+
+		if (check != NULL) {
+			Process *curr = check;
+			printf("On disk: %d ", curr->process_id);
+			while (curr->next != NULL) {
+				printf("%d ", curr->next->process_id);
+				curr = curr->next;
+			}
+			printf("\n");
+		} else {
+			printf("On disk: None\n");
+		}
 
 		// Checking for any potential processes to be added to the queue.
 		checked_future_processes = 0;
@@ -192,7 +239,11 @@ void simulate(Process *disk_processes, Memory *memory, char *alg)
 			if(!active->in_mem) {
 				// Remove the process from disk as it is now in memory.
 				Process *curr = disk_processes;
+				if(curr == NULL) {
+					printf("hey\n");
+				}
 				if (curr->active) {
+					printf("hey1\n");
 					if (curr->next != NULL) {
 						disk_processes = curr->next;
 						disk_processes->prev = NULL;
@@ -200,6 +251,7 @@ void simulate(Process *disk_processes, Memory *memory, char *alg)
 						disk_processes = NULL;
 					}
 				} else {
+					printf("hey2\n");
 					while (curr->next != NULL) {
 						if (curr->next->active) {
 							if (curr->next->next != NULL) {
@@ -276,7 +328,6 @@ memory->num_holes, get_mem_usage(memory));
 		}
 		remaining_quantum -= 1;
 		timer += 1;
-		check = disk_processes;
 	}
 	printf("time %d, simulation finished.\n", timer);
 }
