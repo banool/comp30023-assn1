@@ -59,5 +59,3 @@ Queue *create_queue(int quantum);
 void queue_insert(Queue *q, Process *in);
 Process *queue_pop(Queue *q);
 Queue *get_next_queue(Queue *curr_queue, Queue *q1, Queue *q2, Queue *q3);
-
-void print_mem_items(Memory *mem);
