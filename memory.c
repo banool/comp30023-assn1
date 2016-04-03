@@ -117,6 +117,7 @@ Process *memory_remove_largest(Memory *mem)
             if (curr->next->time_inserted_into_mem < time_inserted) {
                 id_biggest = curr->next->process_id;
             }
+            printf("oldest is %d\n", id_biggest);
         }
         curr = curr->next;
     }
