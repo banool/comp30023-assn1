@@ -234,7 +234,8 @@ void simulate_multi(Process *disk_processes, Memory *memory) {
 
 	while(1) {
 		//diag
-		//printf("Time %d q3 num_items = %d\n", timer, q3->num_items);
+		//printf("\nTime %d q3 num_items = %d\n", timer, q3->num_items);
+		//print_mem_items(memory);
 		
 		//printf("curr q: %d", curr_queue->quantum);
 		//diag
@@ -312,7 +313,9 @@ void simulate_multi(Process *disk_processes, Memory *memory) {
 		** Deciding which process to run. If there isn't an active process
 		** we will pop the front of the queue and move it into memory/
 		*/
+		
 		if (active == NULL) {
+
 			//diag
 			//printf("popping new thign off the queueuueeuueuee\n");
 			//diag
@@ -320,10 +323,10 @@ void simulate_multi(Process *disk_processes, Memory *memory) {
 			active = queue_pop(curr_queue);
 			// TODO when items pop from q3 the num items isnt decreasing.
 			active->active = 1;
-			
+
 			// Checking if the process is in memory already. If not:
 			if(!active->in_mem) {
-				
+				//printf("id %d not in mem\n", active->process_id);
 				// Remove the process from disk as it is now in memory.
 				Process *curr = disk_processes;
 				if (curr->active) {
@@ -367,6 +370,7 @@ void simulate_multi(Process *disk_processes, Memory *memory) {
 				*/
 				
 				while (!memory_insert(memory, active)) {
+					//printf("not enough space\n");
 					//diag
 					//printf("current mem usage %d\n", get_mem_usage(memory));
 					/*
@@ -406,7 +410,8 @@ void simulate_multi(Process *disk_processes, Memory *memory) {
 					//printf("current mem usage %d\n", get_mem_usage(memory));
 				}
 			}
-
+			//printf("hey memusage %d\n", get_mem_usage(memory));
+			
 			memory_count_holes(memory);
 			printf("time %d, %d running, numprocesses=%d, numholes=%d,\
  memusage=%d%%\n", timer, active->process_id, memory->num_processes,

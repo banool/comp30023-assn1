@@ -31,7 +31,7 @@ Memory
 // Returns 1 on success, 0 on failure. If failure we use memory_insert_full.
 int
 memory_insert(Memory *mem, Process *in) {
-    //printf("inserting to memorry\n");
+    //printf("inserting to memorry id %d\n", in->process_id);
     
     // If there are no items in memory yet.
     if (mem->processes == NULL) {
@@ -68,7 +68,7 @@ memory_insert(Memory *mem, Process *in) {
     // Checking for space between each process.
     while (curr->next != NULL) {
         // Checking for a large enough gap.
-        if ((curr->end + in->mem_size) < curr->next->start - 2) {
+        if ((curr->end + in->mem_size) < curr->next->start) {
             curr->next->prev = in;
             in->next = curr->next;
             curr->next = in;
@@ -87,7 +87,8 @@ memory_insert(Memory *mem, Process *in) {
     //diag
     //printf("curr end: %d\n", curr->end);
     // Checking for space between last process and end.
-    if ((curr->end + in->mem_size) < (mem->end - 2)) {
+    if ((curr->end + in->mem_size) <= (mem->end)) {
+        //printf("inserting between last and end\n");
         curr->next = in;
         in->prev = curr;
         in->next = NULL;
@@ -118,10 +119,12 @@ Process
 
     // Checking for space between each process.
     int id_biggest = curr->process_id;
+    int biggest = curr->mem_size;
     while (curr->next != NULL) {
         // Checking for a large enough gap.
-        if (curr->next->mem_size > curr->mem_size) {
+        if (curr->next->mem_size > biggest) {
             id_biggest = curr->next->process_id;
+            biggest = curr->next->mem_size;
         }
         //printf("curr target: %d\n", id_biggest);
         curr = curr->next;
@@ -154,6 +157,7 @@ Process
         ret->in_mem = 0;
         mem->processes = NULL;
         mem->num_processes -= 1;
+        //printf("mem is now empty\n");
         return ret;
     }
 
@@ -175,8 +179,8 @@ Process
                 curr->next->prev = curr->prev;
             }
             mem->num_processes -= 1;
-            //if (first)
-            //    mem->processes = curr->next;
+            if (first)
+                mem->processes = curr->next;
             return curr;
         }
 
@@ -324,5 +328,25 @@ Queue
         default:
             return NULL;
             break;
+    }
+}
+
+void
+print_mem_items(Memory *mem) {
+    printf("Processes in memory:\n");
+    if (mem->processes == NULL) {
+        printf("  No processes in memory.\n");
+        return;
+    }
+
+    Process *curr = mem->processes;
+
+    while(1) {
+        printf("  id: %d start: %d end: %d size: %d\n", 
+            curr->process_id, curr->start, curr->end, (curr->end-curr->start));
+        if (curr->next == NULL) {
+            break;
+        }
+        curr = curr->next;
     }
 }
