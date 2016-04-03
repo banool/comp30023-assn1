@@ -74,20 +74,6 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
-	//diag
-	/*
-	if (disk_head != NULL) {
-		Process *curr = disk_head;
-		printf("On disk: %d ", curr);
-		while (curr->next != NULL) {
-			printf("%d ", curr->next->process_id);
-			curr = curr->next;
-		}
-		printf("\n");
-	} else {
-		printf("On disk: None\n");
-	}
-	*/
 	Memory *memory = create_memory(memsize);
 
 	simulate(disk_head, memory, alg);
@@ -101,25 +87,6 @@ void print_usage(char *program_name)
 	fprintf(stderr, "-f Name of input text file\n");
 	fprintf(stderr, "-a [fcfs | multi]\n");
 	fprintf(stderr, "-m Integer in mb greater than 0\n");
-}
-void print_mem_items(Memory *mem)
-{
-    printf("Processes in memory:\n");
-    if (mem->processes == NULL) {
-        printf("  No processes in memory.\n");
-        return;
-    }
-
-    Process *curr = mem->processes;
-
-    while(1) {
-        printf("  id: %d start: %d end: %d size: %d\n", 
-            curr->process_id, curr->start, curr->end, (curr->end-curr->start));
-        if (curr->next == NULL) {
-            break;
-        }
-        curr = curr->next;
-    }
 }
 
 void simulate(Process *disk_processes, Memory *memory, char *alg)
@@ -148,24 +115,8 @@ void simulate(Process *disk_processes, Memory *memory, char *alg)
 	Process *active = NULL;
 
 	while(1) {
-		//diag
-		//printf("timer: %d -- \n", timer);
-		//print_mem_items(memory);
 
 		check = disk_processes;
-		/*
-		if (check != NULL) {
-			Process *curr = check;
-			printf("On disk: %d ", curr->process_id);
-			while (curr->next != NULL) {
-				printf("%d ", curr->next->process_id);
-				curr = curr->next;
-			}
-			printf("\n");
-		} else {
-			printf("On disk: None\n");
-		}
-		*/
 
 		// Checking for any potential processes to be added to the queue.
 		checked_future_processes = 0;
@@ -191,7 +142,6 @@ void simulate(Process *disk_processes, Memory *memory, char *alg)
 			if (check->next == NULL) {
 				checked_future_processes = 1;
 			} else {
-				//printf("check next id: %d\n", check->next->process_id);
 				check = check->next;
 			}
 		}
@@ -274,8 +224,6 @@ void simulate(Process *disk_processes, Memory *memory, char *alg)
 				** process is inserted successfully.
 				*/				
 				while (!memory_insert(memory, active, timer)) {
-					//diag
-					//print_mem_items(memory);
 					/*
 					** Remove the largest and put it back on disk.
 					** Doesn't matter where we put it back on disk because
