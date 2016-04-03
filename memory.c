@@ -38,7 +38,7 @@ int memory_insert(Memory *mem, Process *in)
 
     Process *curr = mem->processes;
     // Checking for space between start of memory and first process.
-    if ((mem->start + in->mem_size) < curr->start) {
+    if ((mem->start + in->mem_size) <= curr->start) {
         in->start = 0;
         in->end = in->mem_size;
 
