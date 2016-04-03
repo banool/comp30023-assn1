@@ -331,6 +331,7 @@ void simulate_multi(Process *disk_processes, Memory *memory) {
 				*/
 				
 				while (!memory_insert(memory, active)) {
+					//printf("current mem usage %d\n", get_mem_usage(memory));
 					/*
 					** Remove the largest and put it back on disk.
 					** Doesn't matter where we put it back on disk because
@@ -344,6 +345,7 @@ void simulate_multi(Process *disk_processes, Memory *memory) {
 						disk_processes->prev = NULL;
 						disk_processes->next = NULL;
 					} else {
+						//printf("current mem usage %d\n", get_mem_usage(memory));
 						Process *curr = disk_processes;
 						while (curr->next != NULL) {
 							curr = curr->next;
@@ -362,6 +364,7 @@ void simulate_multi(Process *disk_processes, Memory *memory) {
 						disk_processes->next = prev_head;
 						disk_processes->prev = NULL;*/
 					}
+					//printf("current mem usage %d\n", get_mem_usage(memory));
 				}
 			}
 

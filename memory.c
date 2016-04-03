@@ -5,7 +5,7 @@
 //diag we dont need this, just here for printf
 #include <stdio.h>
 // TODO Justify this choice. It is 3 current for testing purposes.
-#define BASE_QUEUE_SIZE 6
+#define BASE_QUEUE_SIZE 30
 //TODO a smaller base queue size makes it not correctly track the start of
 // the queue after it allocates more size for itself. Perhaps using
 // incorrect logic to "math out" the start of the queue. 
@@ -115,16 +115,17 @@ Process
     Process *curr = mem->processes;
 
     // Checking for space between each process.
-    int id_biggest = 0;
+    int id_biggest = curr->process_id;
     while (curr->next != NULL) {
         // Checking for a large enough gap.
         if (curr->next->mem_size > curr->mem_size) {
             id_biggest = curr->next->process_id;
         }
+        //printf("curr target: %d\n", id_biggest);
         curr = curr->next;
     }
     //diag
-    //printf("largest iddasdsad: %d\n", id_biggest);
+    //printf("removing largest iddasdsad: %d\n", id_biggest);
     return memory_remove(mem, id_biggest);
 }
 
@@ -144,7 +145,8 @@ Process
 
     // Checking if there was only one item in memory.
     // If so, we free/remove it and reset mem->processes to NULL.
-    if (mem->processes->next == NULL) {
+    //printf("eat my memes awtch them grow num items %d\n", mem->num_processes);
+    if (mem->num_processes == 1) {
         Process *ret = mem->processes;
         ret->active = 0;
         ret->in_mem = 0;
@@ -154,10 +156,13 @@ Process
     }
 
     // Checking if the process to remove is after the 1st element.
+    int first = 1;
     while(1) {
         //diag
         //printf("entered here tho\n");
+        //printf("target %d and curr %d\n", process_id, curr->process_id);
         if (curr->process_id == process_id) {
+            
             curr->active = 0;
             curr->in_mem = 0;
             // Linking the neighbouring processes.
@@ -168,15 +173,18 @@ Process
                 curr->next->prev = curr->prev;
             }
             mem->num_processes -= 1;
+            //if (first)
+            //    mem->processes = curr->next;
             return curr;
         }
 
         curr = curr->next;
+        first = 0;
 
         // Checking for the end of the linked list.        
-        /*if(curr->next == NULL) {
-            break;
-        }*/
+        //if(curr->next == NULL) {
+        //    break;
+        //}
     }
     
     // Shouldn't get here.
@@ -184,7 +192,8 @@ Process
     return NULL;
 }
 
-void memory_count_holes(Memory *mem) {
+void 
+memory_count_holes(Memory *mem) {
     int holes = 0;
     
     Process *curr = mem->processes;
