@@ -252,12 +252,12 @@ void simulate_multi(Process *disk_processes, Memory *memory) {
 			*/
 			if (check->time_created == timer) {
 				queue_insert(q1, check);
-				if (check->next != NULL) {
+				/*if (check->next != NULL) {
 					disk_processes = check->next;
 					disk_processes->prev = NULL;
 				} else {
 					disk_processes = NULL;
-				}
+				}*/
 			}
 			// Testing if we are at the end of the list.
 			if (check->next == NULL) {
@@ -267,7 +267,7 @@ void simulate_multi(Process *disk_processes, Memory *memory) {
 				check = check->next;
 			}
 		}
-
+		
 		// fun fact. this line:
 		// if (active != NULL && remaining_quantum > 0) {
 		// enclosing this block makes it a fcfs alg instead.
@@ -314,13 +314,49 @@ void simulate_multi(Process *disk_processes, Memory *memory) {
 		*/
 		if (active == NULL) {
 			//diag
+			//printf("popping new thign off the queueuueeuueuee\n");
+			//diag
 			//printf("quantum: %d  num items in queue: %d\n", curr_queue->quantum, curr_queue->num_items);
 			active = queue_pop(curr_queue);
 			// TODO when items pop from q3 the num items isnt decreasing.
 			active->active = 1;
-
+			
 			// Checking if the process is in memory already. If not:
 			if(!active->in_mem) {
+				
+				// Remove the process from disk as it is now in memory.
+				Process *curr = disk_processes;
+				if (curr->active) {
+					//diag
+						//printf("popping off head of disk\n");
+					if (curr->next != NULL) {
+						disk_processes = curr->next;
+						disk_processes->prev = NULL;
+					} else {
+						//diag
+						//printf("disk processes are null\n");
+						disk_processes = NULL;
+					}
+				} else {
+					//diag
+						//printf("relink disk processes\n");
+					while (curr->next != NULL) {
+						if (curr->next->active) {
+							if (curr->next->next != NULL) {
+								curr->next = curr->next->next;
+								curr->next->prev = curr;
+							} else {
+								curr->next = NULL;
+							}
+							break;
+						}
+						//diag
+						//printf("next\n");
+						curr = curr->next;
+					}
+				}
+				//diag
+				//printf("hey\n");
 
 				/* 
 				** Trying to insert the process into memory.
@@ -331,6 +367,7 @@ void simulate_multi(Process *disk_processes, Memory *memory) {
 				*/
 				
 				while (!memory_insert(memory, active)) {
+					//diag
 					//printf("current mem usage %d\n", get_mem_usage(memory));
 					/*
 					** Remove the largest and put it back on disk.
@@ -345,6 +382,7 @@ void simulate_multi(Process *disk_processes, Memory *memory) {
 						disk_processes->prev = NULL;
 						disk_processes->next = NULL;
 					} else {
+						//diag
 						//printf("current mem usage %d\n", get_mem_usage(memory));
 						Process *curr = disk_processes;
 						while (curr->next != NULL) {
@@ -364,6 +402,7 @@ void simulate_multi(Process *disk_processes, Memory *memory) {
 						disk_processes->next = prev_head;
 						disk_processes->prev = NULL;*/
 					}
+					//diag
 					//printf("current mem usage %d\n", get_mem_usage(memory));
 				}
 			}
@@ -382,6 +421,8 @@ memory->num_holes, get_mem_usage(memory));
 		** neighbouring processes. We then free it and set active to NULL.
 		*/
 		if (active->remaining_time == 0) {
+			//if (curr_queue->quantum == Q3_LENGTH)
+			//	curr_queue->num_items -= 1;
 			//diag
 			//printf("active id: %d is dying\n", active->process_id);
 			// Discard the pointer, we don't need it as the process is done.
@@ -394,7 +435,7 @@ memory->num_holes, get_mem_usage(memory));
 			   queue being 0 might not be the best because another item
 			   might come in while the queue is empty. check by future
 			   processes being empty or something? */
-			if (!q1->num_items && !q2->num_items && !q3->num_items) {
+			if (!q1->num_items && !q2->num_items && !q3->num_items && disk_processes == NULL) {
 				// printf("death\n"); //diag
 				timer += 1;
 				break;

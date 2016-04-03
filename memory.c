@@ -44,6 +44,8 @@ memory_insert(Memory *mem, Process *in) {
 
         mem->num_processes += 1;
         in->in_mem = 1;
+        //diag
+        //printf("hey in process id %d\n", in->process_id);
         return 1;
 
     }
@@ -146,7 +148,7 @@ Process
     // Checking if there was only one item in memory.
     // If so, we free/remove it and reset mem->processes to NULL.
     //printf("eat my memes awtch them grow num items %d\n", mem->num_processes);
-    if (mem->num_processes == 1) {
+    if (mem->processes->next == NULL) {
         Process *ret = mem->processes;
         ret->active = 0;
         ret->in_mem = 0;
@@ -188,7 +190,7 @@ Process
     }
     
     // Shouldn't get here.
-    printf("you got here memed\n");
+    //printf("you got here memed\n");
     return NULL;
 }
 
