@@ -1,0 +1,105 @@
+timer: 0 -- 
+Processes in memory:
+  No processes in memory.
+time 0, 2 running, numprocesses=1, numholes=1, memusage=33%
+timer: 1 -- 
+Processes in memory:
+  id: 2 start: 0 end: 10 size: 10
+timer: 2 -- 
+Processes in memory:
+  id: 2 start: 0 end: 10 size: 10
+time 2, 3 running, numprocesses=2, numholes=1, memusage=66%
+timer: 3 -- 
+Processes in memory:
+  id: 2 start: 0 end: 10 size: 10
+  id: 3 start: 10 end: 20 size: 10
+timer: 4 -- 
+Processes in memory:
+  id: 2 start: 0 end: 10 size: 10
+  id: 3 start: 10 end: 20 size: 10
+time 4, 2 running, numprocesses=2, numholes=1, memusage=66%
+target: 2, curr 2
+linking next to prev
+timer: 5 -- 
+Processes in memory:
+  id: 3 start: 10 end: 20 size: 10
+time 5, 3 running, numprocesses=1, numholes=2, memusage=33%
+timer: 6 -- 
+Processes in memory:
+  id: 3 start: 10 end: 20 size: 10
+timer: 7 -- 
+Processes in memory:
+  id: 3 start: 10 end: 20 size: 10
+timer: 8 -- 
+Processes in memory:
+  id: 3 start: 10 end: 20 size: 10
+timer: 9 -- 
+Processes in memory:
+  id: 3 start: 10 end: 20 size: 10
+id 4 space before first process
+time 9, 4 running, numprocesses=2, numholes=1, memusage=66%
+timer: 10 -- 
+Processes in memory:
+  id: 4 start: 0 end: 10 size: 10
+  id: 3 start: 10 end: 20 size: 10
+timer: 11 -- 
+Processes in memory:
+  id: 4 start: 0 end: 10 size: 10
+  id: 3 start: 10 end: 20 size: 10
+make space
+Processes in memory:
+  id: 4 start: 0 end: 10 size: 10
+  id: 3 start: 10 end: 20 size: 10
+removing 3
+target: 3, curr 4
+target: 3, curr 3
+linking prev 4 to next
+time 11, 5 running, numprocesses=2, numholes=1, memusage=83%
+timer: 12 -- 
+Processes in memory:
+  id: 4 start: 0 end: 10 size: 10
+  id: 5 start: 10 end: 25 size: 15
+timer: 13 -- 
+Processes in memory:
+  id: 4 start: 0 end: 10 size: 10
+  id: 5 start: 10 end: 25 size: 15
+time 13, 4 running, numprocesses=2, numholes=1, memusage=83%
+timer: 14 -- 
+Processes in memory:
+  id: 4 start: 0 end: 10 size: 10
+  id: 5 start: 10 end: 25 size: 15
+timer: 15 -- 
+Processes in memory:
+  id: 4 start: 0 end: 10 size: 10
+  id: 5 start: 10 end: 25 size: 15
+timer: 16 -- 
+Processes in memory:
+  id: 4 start: 0 end: 10 size: 10
+  id: 5 start: 10 end: 25 size: 15
+target: 4, curr 4
+linking next to prev
+timer: 17 -- 
+Processes in memory:
+  id: 5 start: 10 end: 25 size: 15
+time 17, 5 running, numprocesses=1, numholes=2, memusage=50%
+timer: 18 -- 
+Processes in memory:
+  id: 5 start: 10 end: 25 size: 15
+timer: 19 -- 
+Processes in memory:
+  id: 5 start: 10 end: 25 size: 15
+timer: 20 -- 
+Processes in memory:
+  id: 5 start: 10 end: 25 size: 15
+timer: 21 -- 
+Processes in memory:
+  id: 5 start: 10 end: 25 size: 15
+id 3 space before first process
+time 21, 3 running, numprocesses=2, numholes=1, memusage=83%
+target: 3, curr 3
+linking next to prev
+timer: 22 -- 
+Processes in memory:
+  id: 5 start: 10 end: 25 size: 15
+time 22, 5 running, numprocesses=1, numholes=2, memusage=50%
+time 23, simulation finished.

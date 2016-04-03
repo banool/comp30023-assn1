@@ -13,6 +13,7 @@ typedef struct Process_s {
     int remaining_time; // Starts equal to job time.
     int active; // Bool representing if the Process is being actively run.
     int in_mem; // Bool representing if the Process is loaded into memory.
+    int time_inserted_into_mem; // Value of timer when put into mem. -1 if out.
 
     /*
     ** We need to track both the next and previous process because

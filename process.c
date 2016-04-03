@@ -96,6 +96,7 @@ Process *create_process(int inp1, int inp2, int inp3, int inp4)
     p->remaining_time = inp4; // Just the job_time to start with.
     p->active = 0;
     p->in_mem = 0;
+    p->time_inserted_into_mem = -1;
 
     p->next = malloc(sizeof(Process*));
     p->next = NULL; // Will already be NULL if tail.

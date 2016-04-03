@@ -20,7 +20,7 @@ Memory
 }
 
 // Returns 1 on success, 0 on failure. If failure we use memory_remove_largest.
-int memory_insert(Memory *mem, Process *in)
+int memory_insert(Memory *mem, Process *in, int timer)
 {
     // If there are no items in memory yet.
     if (mem->processes == NULL) {
@@ -33,21 +33,26 @@ int memory_insert(Memory *mem, Process *in)
 
         mem->num_processes += 1;
         in->in_mem = 1;
+        in->time_inserted_into_mem = timer;
         return 1;
     }
 
     Process *curr = mem->processes;
     // Checking for space between start of memory and first process.
     if ((mem->start + in->mem_size) <= curr->start) {
+        //diag
+        //printf("id %d space before first process\n", in->process_id);
         in->start = 0;
         in->end = in->mem_size;
 
         in->prev = NULL;
         in->next = mem->processes;
+        mem->processes->prev = in;
         mem->processes = in;
 
         mem->num_processes += 1;
         in->in_mem = 1;
+        in->time_inserted_into_mem = timer;
         return 1;
     }
 
@@ -65,6 +70,7 @@ int memory_insert(Memory *mem, Process *in)
 
             mem->num_processes += 1;
             in->in_mem = 1;
+            in->time_inserted_into_mem = timer;
             return 1;
         }
         curr = curr->next;
@@ -81,6 +87,7 @@ int memory_insert(Memory *mem, Process *in)
 
         mem->num_processes += 1;
         in->in_mem = 1;
+        in->time_inserted_into_mem = timer;
         return 1;
     }
 
@@ -99,14 +106,21 @@ Process *memory_remove_largest(Memory *mem)
     // Checking for space between each process.
     int id_biggest = curr->process_id;
     int biggest = curr->mem_size;
+    int time_inserted = curr->time_inserted_into_mem;
     while (curr->next != NULL) {
         // Checking for a large enough gap.
         if (curr->next->mem_size > biggest) {
             id_biggest = curr->next->process_id;
             biggest = curr->next->mem_size;
+            time_inserted = curr->time_inserted_into_mem;
+        } else if (curr->next->mem_size == biggest) {
+            if (curr->next->time_inserted_into_mem < time_inserted) {
+                id_biggest = curr->next->process_id;
+            }
         }
         curr = curr->next;
     }
+    //printf("removing %d\n", id_biggest);
     return memory_remove(mem, id_biggest);
 }
 
@@ -131,6 +145,7 @@ Process *memory_remove(Memory *mem, int process_id)
         Process *ret = mem->processes;
         ret->active = 0;
         ret->in_mem = 0;
+        ret->time_inserted_into_mem = -1;
         mem->processes = NULL;
         mem->num_processes -= 1;
         return ret;
@@ -139,14 +154,18 @@ Process *memory_remove(Memory *mem, int process_id)
     // Checking if the process to remove is after the 1st element.
     int first = 1;
     while(1) {
+        //printf("target: %d, curr %d\n", process_id, curr->process_id);
         if (curr->process_id == process_id) {
             curr->active = 0;
             curr->in_mem = 0;
+            curr->time_inserted_into_mem = -1;
             // Linking the neighbouring processes.
             if (curr->prev != NULL) {
+                //printf("linking prev %d to next\n", curr->prev->process_id);
                 curr->prev->next = curr->next;
             }
             if (curr->next != NULL) {
+                //printf("linking next to prev\n");
                 curr->next->prev = curr->prev;
             }
             mem->num_processes -= 1;

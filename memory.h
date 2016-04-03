@@ -10,7 +10,7 @@ typedef struct Memory_s {
 } Memory;
 
 Memory *create_memory(int mem_size);
-int memory_insert(Memory *mem, Process *in);
+int memory_insert(Memory *mem, Process *in, int timer);
 Process *memory_remove_largest(Memory *mem);
 Process *memory_remove(Memory *mem, int process_id);
 void memory_count_holes(Memory *mem);

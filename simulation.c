@@ -75,6 +75,7 @@ int main(int argc, char **argv)
 	}
 
 	//diag
+	/*
 	if (disk_head != NULL) {
 		Process *curr = disk_head;
 		printf("On disk: %d ", curr);
@@ -86,7 +87,7 @@ int main(int argc, char **argv)
 	} else {
 		printf("On disk: None\n");
 	}
-
+	*/
 	Memory *memory = create_memory(memsize);
 
 	simulate(disk_head, memory, alg);
@@ -147,11 +148,12 @@ void simulate(Process *disk_processes, Memory *memory, char *alg)
 	Process *active = NULL;
 
 	while(1) {
-		printf("timer: %d -- ", timer);
-		print_mem_items(memory);
+		//diag
+		//printf("timer: %d -- \n", timer);
+		//print_mem_items(memory);
 
 		check = disk_processes;
-
+		/*
 		if (check != NULL) {
 			Process *curr = check;
 			printf("On disk: %d ", curr->process_id);
@@ -163,6 +165,7 @@ void simulate(Process *disk_processes, Memory *memory, char *alg)
 		} else {
 			printf("On disk: None\n");
 		}
+		*/
 
 		// Checking for any potential processes to be added to the queue.
 		checked_future_processes = 0;
@@ -240,10 +243,8 @@ void simulate(Process *disk_processes, Memory *memory, char *alg)
 				// Remove the process from disk as it is now in memory.
 				Process *curr = disk_processes;
 				if(curr == NULL) {
-					printf("hey\n");
 				}
 				if (curr->active) {
-					printf("hey1\n");
 					if (curr->next != NULL) {
 						disk_processes = curr->next;
 						disk_processes->prev = NULL;
@@ -251,7 +252,6 @@ void simulate(Process *disk_processes, Memory *memory, char *alg)
 						disk_processes = NULL;
 					}
 				} else {
-					printf("hey2\n");
 					while (curr->next != NULL) {
 						if (curr->next->active) {
 							if (curr->next->next != NULL) {
@@ -273,7 +273,9 @@ void simulate(Process *disk_processes, Memory *memory, char *alg)
 				** It will keep doing these two functions until the 
 				** process is inserted successfully.
 				*/				
-				while (!memory_insert(memory, active)) {
+				while (!memory_insert(memory, active, timer)) {
+					//diag
+					//print_mem_items(memory);
 					/*
 					** Remove the largest and put it back on disk.
 					** Doesn't matter where we put it back on disk because
