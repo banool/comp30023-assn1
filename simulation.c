@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include "memory.h"
 #include "queue.h"
 
@@ -64,7 +65,7 @@ int main(int argc, char **argv)
 				return -1;
 				break;
 		}
-	}	
+	}
 	
 	// TODO insert error/validity checking for options.
 
@@ -87,6 +88,26 @@ void print_usage(char *program_name)
 	fprintf(stderr, "-f Name of input text file\n");
 	fprintf(stderr, "-a [fcfs | multi]\n");
 	fprintf(stderr, "-m Integer in mb greater than 0\n");
+}
+
+void print_mem_items(Memory *mem)
+{
+    printf("Processes in memory:\n");
+    if (mem->processes == NULL) {
+        printf("  No processes in memory.\n");
+        return;
+    }
+
+    Process *curr = mem->processes;
+
+    while(1) {
+        printf("  id: %d start: %d end: %d size: %d\n", 
+            curr->process_id, curr->start, curr->end, (curr->end-curr->start));
+        if (curr->next == NULL) {
+            break;
+        }
+        curr = curr->next;
+    }
 }
 
 void simulate(Process *disk_processes, Memory *memory, char *alg)
@@ -115,6 +136,8 @@ void simulate(Process *disk_processes, Memory *memory, char *alg)
 	Process *active = NULL;
 
 	while(1) {
+		//printf("time: %d\n", timer);
+		//print_mem_items(memory);
 
 		check = disk_processes;
 

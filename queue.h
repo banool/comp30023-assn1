@@ -22,7 +22,7 @@ typedef struct Queue_s {
     int num_items;
     int max_size;
     // An array of pointers to processes (either in memory or on "disk").
-    Process *queue[]; 
+    Process *queue[];
 } Queue;
 
 Queue *create_queue(int quantum);

@@ -26,8 +26,9 @@ int memory_insert(Memory *mem, Process *in, int timer)
     if (mem->processes == NULL) {
         mem->processes = in;
 
-        in->start = 0;
-        in->end = in->mem_size;
+        in->start = mem->end - in->mem_size;
+        in->end = mem->end;
+
         in->next = NULL; //TODO process.c:64:66 explains why we do this.
         in->prev = NULL; //TODO is this necessary?
 
@@ -38,15 +39,16 @@ int memory_insert(Memory *mem, Process *in, int timer)
     }
 
     Process *curr = mem->processes;
-    // Checking for space between start of memory and first process.
-    if ((mem->start + in->mem_size) <= curr->start) {
-        in->start = 0;
-        in->end = in->mem_size;
 
+    // Checking for space between first process and end.
+    if ((mem->end - in->mem_size) >= (curr->end)) {
         in->prev = NULL;
         in->next = mem->processes;
-        mem->processes->prev = in;
         mem->processes = in;
+        curr->prev = in;
+
+        in->start = mem->end - in->mem_size;
+        in->end = mem->end;
 
         mem->num_processes += 1;
         in->in_mem = 1;
@@ -57,14 +59,14 @@ int memory_insert(Memory *mem, Process *in, int timer)
     // Checking for space between each process.
     while (curr->next != NULL) {
         // Checking for a large enough gap.
-        if ((curr->end + in->mem_size) <= curr->next->start) {
+        if ((curr->start - in->mem_size) >= curr->next->end) {
+            in->start = curr->start - in->mem_size;
+            in->end = curr->start;
+
             curr->next->prev = in;
             in->next = curr->next;
             curr->next = in;
             in->prev = curr;
-
-            in->start = curr->end;
-            in->end = in->start + in->mem_size;
 
             mem->num_processes += 1;
             in->in_mem = 1;
@@ -74,14 +76,16 @@ int memory_insert(Memory *mem, Process *in, int timer)
         curr = curr->next;
     }
 
-    // Checking for space between last process and end.
-    if ((curr->end + in->mem_size) <= (mem->end)) {
+    // Checking for space between start of memory and last process.
+    if ((curr->start - in->mem_size) >= mem->start) {
+        //diag
+        //printf("inserting between last and start\n");
+        in->start = curr->start - in->mem_size;
+        in->end = curr->start;
+
         curr->next = in;
         in->prev = curr;
         in->next = NULL;
-
-        in->start = curr->end;
-        in->end = in->start + in->mem_size;
 
         mem->num_processes += 1;
         in->in_mem = 1;
@@ -187,9 +191,8 @@ void memory_count_holes(Memory *mem)
         mem->num_holes = 1;
     }
 
-    // Checking if the first process is at mem address 0 or not.
-    if (curr->start > mem->start)
-    {
+    // Checking if the first process is at mem address <end> or not.
+    if (curr->end < mem->end) {
         holes +=1;
     }
     
@@ -198,7 +201,7 @@ void memory_count_holes(Memory *mem)
         if(curr->next == NULL) 
             break;
         // Checking for holes up until the last process.
-        if (curr->end < curr->next->start) 
+        if (curr->start > curr->next->end) 
         {
             holes +=1;
         }
@@ -206,7 +209,7 @@ void memory_count_holes(Memory *mem)
     }
     
     // Checking for a hole between the last process and the end.
-    if (curr->end < mem->end) {
+    if (curr->start > mem->start) {
         holes +=1;
     }
 
