@@ -21,7 +21,6 @@ int main(int argc, char **argv)
 	char *alg;		// fcfs or multi.
 	int  memsize;	// Given virtual memsize.
 
-	// TODO is this how it should be done? Or with getopt also?
 	if (argc != 7) {
 		print_usage(argv[0]);
 		return -1;
@@ -63,15 +62,19 @@ int main(int argc, char **argv)
 				// Should not get here.
 				print_usage(argv[0]);
 				return -1;
-				break;
 		}
 	}
 	
-	// TODO insert error/validity checking for options.
-
+	/*
+	** Here we read processes into disk. Throughout the life of the
+	** simulation, this disk linked list will hold both processes that
+	** haven't yet been started (future processes whose start times are
+	** greater than the current simulation time) as well as processes
+	** that have been swapped back to disk because memory was too full.
+	*/
 	Process *disk_head = read_processes(target, memsize);
 	if (disk_head == NULL) {
-		fprintf(stderr, "%s could not be read in properly, exiting...\n", target);
+		fprintf(stderr, "%s couldn't be read properly, exiting...\n", target);
 		return -1;
 	}
 
@@ -82,34 +85,41 @@ int main(int argc, char **argv)
 	return 0;
 }
 
+
+/*
+** Print usage on incorrect command line usage.
+*/
 void print_usage(char *program_name)
 {
-	fprintf(stderr, "Usage: %s -f [target file name] -a [algorithm] -m [memsize]\n", program_name);
+	fprintf(stderr, "Usage: %s -f [target file name] -a [algorithm]\
+ -m [memsize]\n", program_name);
 	fprintf(stderr, "-f Name of input text file\n");
 	fprintf(stderr, "-a [fcfs | multi]\n");
 	fprintf(stderr, "-m Integer in mb greater than 0\n");
 }
 
-void print_mem_items(Memory *mem)
-{
-    printf("Processes in memory:\n");
-    if (mem->processes == NULL) {
-        printf("  No processes in memory.\n");
-        return;
-    }
-
-    Process *curr = mem->processes;
-
-    while(1) {
-        printf("  id: %d start: %d end: %d size: %d\n", 
-            curr->process_id, curr->start, curr->end, (curr->end-curr->start));
-        if (curr->next == NULL) {
-            break;
-        }
-        curr = curr->next;
-    }
-}
-
+/*
+** This is the main function that controls the simulation in the program.
+** After we create the appropriate queues, the main steps of this function are:
+** - Check for processes on disk which haven't been loaded into a queue yet
+**   based on if the timer equals the start time for that process.
+** - If alg is multi, check if the current queue has expired its quantum.
+**   If so, we move the active process (assuming there is one and it hasn't
+**   just finished running) back onto the appropriate queue and mark the next
+**   queue to run.
+** - If there isn't an active process, we pop one off the queue and remove
+**   it from disk (if not already in memory).
+** - We try to load this process in to memory. If there isn't enough space,
+**   we keep removing the largest (oldest if equal sizes) from the queue 
+**   until there is enough space.
+** - Count the holes and print the statement for when a process starts running.
+** - Decrement the time remaining for the active process and then check if it
+**   is done. If so, we remove the process from memory and free it.
+** - If a process just finished, we then check if there are any processes
+**   left in the queues or on disk. If so, we're done!
+** - Otherwise, we just incrememnt the timer and decrement the remaining
+**   time for the given quantum (assuming we're doing multi).
+*/
 void simulate(Process *disk_processes, Memory *memory, char *alg)
 {
 	int timer = 0;
@@ -136,15 +146,15 @@ void simulate(Process *disk_processes, Memory *memory, char *alg)
 	Process *active = NULL;
 
 	while(1) {
-		//printf("time: %d\n", timer);
-		//print_mem_items(memory);
 
 		check = disk_processes;
 
 		// Checking for any potential processes to be added to the queue.
 		checked_future_processes = 0;
+
 		if (check == NULL) 
 			checked_future_processes = 1;
+
 		while (!checked_future_processes) {
 			/*
 			** Is == and not >= because this would pick up processes that
@@ -154,13 +164,8 @@ void simulate(Process *disk_processes, Memory *memory, char *alg)
 			*/
 			if (check->time_created == timer) {
 				queue_insert(q1, check);
-				/*if (check->next != NULL) {
-					disk_processes = check->next;
-					disk_processes->prev = NULL;
-				} else {
-					disk_processes = NULL;
-				}*/
 			}
+			
 			// Testing if we are at the end of the list.
 			if (check->next == NULL) {
 				checked_future_processes = 1;
@@ -189,6 +194,7 @@ void simulate(Process *disk_processes, Memory *memory, char *alg)
 			}
 			
 			// Round robin into the next queue for this iteration.
+			// q1, then q2 if q1 empty, then q3 if q2 empty.
 			curr_queue = q1;
 			if (!q1->num_items) {
 				curr_queue = q2;
@@ -211,19 +217,24 @@ void simulate(Process *disk_processes, Memory *memory, char *alg)
 			active = queue_pop(curr_queue);
 			active->active = 1;
 
-			// Checking if the process is in memory already. If not:
+			// Checking if the process is in memory already. If not we remove
+			// it from disk and later insert it into memory.
 			if(!active->in_mem) {
-				// Remove the process from disk as it is now in memory.
 				Process *curr = disk_processes;
-				if(curr == NULL) {
-				}
+				// Checking if the relevant process is at the head of the
+				// disk linked list.
 				if (curr->active) {
+					// If there is more than one item, link the head to the
+					// next process in the linked list.
 					if (curr->next != NULL) {
 						disk_processes = curr->next;
 						disk_processes->prev = NULL;
+					// Otherwise just set disk processes to NULL. 
 					} else {
 						disk_processes = NULL;
 					}
+				// If the process is not at the head, we iterate through
+				// disk processes until we find it and re-link accordingly.
 				} else {
 					while (curr->next != NULL) {
 						if (curr->next->active) {
@@ -270,7 +281,9 @@ void simulate(Process *disk_processes, Memory *memory, char *alg)
 					}
 				}
 			}
-			
+
+			// Count holes and print the appropriate message for when
+			// a process starts running.
 			memory_count_holes(memory);
 			printf("time %d, %d running, numprocesses=%d, numholes=%d,\
  memusage=%d%%\n", timer, active->process_id, memory->num_processes,
@@ -293,6 +306,7 @@ memory->num_holes, get_mem_usage(memory));
 			remaining_quantum = 1;
 
 			// Check if there's anything left in the queue or on disk.
+			// If so, we're done!
 			if (!q1->num_items && !q2->num_items && !q3->num_items && 
 				disk_processes == NULL) {
 				timer += 1;
@@ -302,5 +316,6 @@ memory->num_holes, get_mem_usage(memory));
 		remaining_quantum -= 1;
 		timer += 1;
 	}
+
 	printf("time %d, simulation finished.\n", timer);
 }

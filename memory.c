@@ -19,7 +19,13 @@ Memory
     return mem;
 }
 
-// Returns 1 on success, 0 on failure. If failure we use memory_remove_largest.
+/*
+** First checks for space between the end of memory and the first process.
+** Then checks for space between each process. Finally looks for space between
+** the last process and the start of memory. Links pointers appropriately.
+**
+** Returns 1 on success, 0 on failure. If failure we use memory_remove_largest.
+*/
 int memory_insert(Memory *mem, Process *in, int timer)
 {
     // If there are no items in memory yet.
@@ -78,8 +84,6 @@ int memory_insert(Memory *mem, Process *in, int timer)
 
     // Checking for space between start of memory and last process.
     if ((curr->start - in->mem_size) >= mem->start) {
-        //diag
-        //printf("inserting between last and start\n");
         in->start = curr->start - in->mem_size;
         in->end = curr->start;
 
@@ -98,9 +102,13 @@ int memory_insert(Memory *mem, Process *in, int timer)
     return 0;
 }
 
-// TODO EXPAND this pre much is used when it's been found that there
-// isn't enough space in memory. This function finds the id of the largest
-// item in memory and then passes it to memory_remove() to remove it.
+/*
+** Iterates through all processes in memory. Sets the biggest as the 
+** first process and then updates it if each next process is bigger.
+** In the case of an equal size, the process that has been in their
+** longer is marked for deletion. Once the largest process is found, 
+** it is passed to memory_remove() for deletion.
+*/
 Process *memory_remove_largest(Memory *mem)
 {
     Process *curr = mem->processes;
@@ -182,6 +190,10 @@ Process *memory_remove(Memory *mem, int process_id)
     return NULL;
 }
 
+/*
+** Recalculates and updates num_holes value in the memory struct.
+** Iterate through the processes and check the space between each of them. 
+*/
 void memory_count_holes(Memory *mem)
 {
     int holes = 0;
@@ -216,6 +228,10 @@ void memory_count_holes(Memory *mem)
     mem->num_holes = holes;
 }
 
+/*
+** Add up the total size of the processes in emory and return
+** as a percentage. For use the print function when a process starts.
+*/
 int get_mem_usage(Memory *mem)
 {
     int total_usage = 0;

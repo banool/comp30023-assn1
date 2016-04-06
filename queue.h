@@ -3,8 +3,7 @@
 #define Q1_LENGTH 2
 #define Q2_LENGTH 4
 #define Q3_LENGTH 8
-// TODO Justify this choice. It is 30 current for testing purposes.
-#define BASE_QUEUE_SIZE 30
+#define BASE_QUEUE_SIZE 64
 
 typedef struct Queue_s {
     int quantum; // -1 means fcfs.
