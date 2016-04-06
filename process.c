@@ -12,11 +12,13 @@
 ** this array is if it were current and future processes on disk.
 ** 
 ** Returns pointer to the head of the linked list of disk processes.
+** Also updates the num_processes pointer so we know how big we
+** need to make the queues when we initialise them.
 ** 
-** Initial code based off code from Andrew Turpin, writen
+** Initial code based off code from Andrew Turpin, written
 ** Wed 29 Apr 2015 06:32:22 AEST
 */
-Process *read_processes(char *target, int memsize)
+Process *read_processes(char *target, int memsize, int *num_processes)
 {
     // This line confirms if the target file exists.
     if(access(target, R_OK ) == -1 ) {
@@ -63,6 +65,7 @@ Process *read_processes(char *target, int memsize)
         }
         
         first = 0;
+        *num_processes += 1;
 
     }
 

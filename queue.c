@@ -6,8 +6,11 @@
 ** Creates a new queue with the given quantum.
 ** Note the comment about mallocing size for a struct with a
 ** flexible (dynamic) array member.
+** 
+** Sets the queue size to the maximum number of items it could hold
+** being the number of processes that were given initially.
 */
-Queue *create_queue(int quantum)
+Queue *create_queue(int quantum, int size)
 {
     Queue *q;
     /* 
@@ -17,11 +20,11 @@ Queue *create_queue(int quantum)
     ** but instead just malloc the Queue the size of both the size of the
     ** struct AND the size of the array.
     */
-    q = malloc(sizeof(Queue) + sizeof(Process*) * BASE_QUEUE_SIZE);
+    q = malloc(sizeof(Queue) + sizeof(Process*) * size);
     q->quantum = quantum;
     q->start = 0;
     q->num_items = 0;
-    q->max_size = BASE_QUEUE_SIZE;
+    q->max_size = size;
     return q;
 }
 
@@ -31,20 +34,6 @@ Queue *create_queue(int quantum)
 */
 void queue_insert(Queue *q, Process *in)
 {
-    /*
-    ** Unfortunately, the code I had for doubling the size of the array
-    ** didn't work because I couldn't calculate the new index properly.
-    ** Neither did multiple attempts to make a new queue with the items
-    ** shuffled back to the start. As such, the program will eventually
-    ** segfault if the size of the queue is doubled. Because of this,
-    ** the inital queue size has been set to 64 to avoid this issue.
-    */
-    if (q->max_size <= q->num_items) {
-        q = realloc(q, sizeof(Queue) + sizeof(Process*) * q->max_size * 2);
-        assert(q);
-        q->max_size *= 2;
-    }
-
     int next_index = (q->start + q->num_items) % q->max_size;
     q->queue[next_index] = in;
     q->num_items += 1;

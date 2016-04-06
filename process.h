@@ -24,6 +24,6 @@ typedef struct Process_s {
     struct Process_s *prev;
 } Process;
 
-Process *read_processes(char *target, int memsize);
+Process * read_processes(char *target, int memsize, int *num_processes);
 Process *create_process(int inp1, int inp2, int inp3, int inp4);
 void free_process(Process *p);

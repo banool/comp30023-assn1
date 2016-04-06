@@ -12,7 +12,8 @@
 extern char *optarg;
 
 void print_usage(char *program_name);
-void simulate(Process *disk_processes, Memory *memory, char *alg);
+void simulate(Process *disk_processes, int num_procceses, Memory *memory, 
+	char *alg);
 
 int main(int argc, char **argv)
 {
@@ -72,7 +73,8 @@ int main(int argc, char **argv)
 	** greater than the current simulation time) as well as processes
 	** that have been swapped back to disk because memory was too full.
 	*/
-	Process *disk_head = read_processes(target, memsize);
+	int num_processes = 0;
+	Process *disk_head = read_processes(target, memsize, &num_processes);
 	if (disk_head == NULL) {
 		fprintf(stderr, "%s couldn't be read properly, exiting...\n", target);
 		return -1;
@@ -80,7 +82,7 @@ int main(int argc, char **argv)
 
 	Memory *memory = create_memory(memsize);
 
-	simulate(disk_head, memory, alg);
+	simulate(disk_head, num_processes, memory, alg);
 	
 	return 0;
 }
@@ -102,25 +104,26 @@ void print_usage(char *program_name)
 ** This is the main function that controls the simulation in the program.
 ** After we create the appropriate queues, the main steps of this function are:
 ** - Check for processes on disk which haven't been loaded into a queue yet
-**   based on if the timer equals the start time for that process.
+**     based on if the timer equals the start time for that process.
 ** - If alg is multi, check if the current queue has expired its quantum.
-**   If so, we move the active process (assuming there is one and it hasn't
-**   just finished running) back onto the appropriate queue and mark the next
-**   queue to run.
+**     If so, we move the active process (assuming there is one and it hasn't
+**     just finished running) back onto the appropriate queue and mark the next
+**     queue to run.
 ** - If there isn't an active process, we pop one off the queue and remove
-**   it from disk (if not already in memory).
+**     it from disk (if not already in memory).
 ** - We try to load this process in to memory. If there isn't enough space,
-**   we keep removing the largest (oldest if equal sizes) from the queue 
-**   until there is enough space.
+**     we keep removing the largest (oldest if equal sizes) from the queue 
+**     until there is enough space.
 ** - Count the holes and print the statement for when a process starts running.
 ** - Decrement the time remaining for the active process and then check if it
-**   is done. If so, we remove the process from memory and free it.
+**     is done. If so, we remove the process from memory and free it.
 ** - If a process just finished, we then check if there are any processes
-**   left in the queues or on disk. If so, we're done!
+**     left in the queues or on disk. If so, we're done!
 ** - Otherwise, we just incrememnt the timer and decrement the remaining
-**   time for the given quantum (assuming we're doing multi).
+**     time for the given quantum (assuming we're doing multi).
 */
-void simulate(Process *disk_processes, Memory *memory, char *alg)
+void simulate(Process *disk_processes, int num_processes, Memory *memory,
+	char *alg)
 {
 	int timer = 0;
 	int checked_future_processes;
@@ -131,14 +134,14 @@ void simulate(Process *disk_processes, Memory *memory, char *alg)
 	int fcfs = 0;
 	if (!strcmp(alg, FCFS)) {
 		fcfs = 1;
-		q1 = create_queue(-1); // -1 Signifies a fcfs queue.
+		q1 = create_queue(-1, num_processes); // -1 Signifies a fcfs queue.
 	} else {	
-		q1 = create_queue(Q1_LENGTH);
+		q1 = create_queue(Q1_LENGTH, num_processes);
 	}
 	
 	// These will be unsued if the algorithm is fcfs.
-	Queue *q2 = create_queue(Q2_LENGTH);
-	Queue *q3 = create_queue(Q3_LENGTH);
+	Queue *q2 = create_queue(Q2_LENGTH, num_processes);
+	Queue *q3 = create_queue(Q3_LENGTH, num_processes);
 	
 	Queue *curr_queue = q1;
 	int remaining_quantum = q1->quantum;
