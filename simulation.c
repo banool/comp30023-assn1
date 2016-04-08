@@ -14,6 +14,7 @@ extern char *optarg;
 void print_usage(char *program_name);
 void simulate(Process *disk_processes, int num_procceses, Memory *memory, 
 	char *alg);
+void check_future_processes(Process *check, Queue *q1, int timer);
 
 int main(int argc, char **argv)
 {
@@ -126,11 +127,11 @@ void simulate(Process *disk_processes, int num_processes, Memory *memory,
 	char *alg)
 {
 	int timer = 0;
-	int checked_future_processes;
 	Process *check = disk_processes;
 
 	Queue *q1;
 
+	// Setting up for the given algorithm.
 	int fcfs = 0;
 	if (!strcmp(alg, FCFS)) {
 		fcfs = 1;
@@ -153,29 +154,7 @@ void simulate(Process *disk_processes, int num_processes, Memory *memory,
 		check = disk_processes;
 
 		// Checking for any potential processes to be added to the queue.
-		checked_future_processes = 0;
-
-		if (check == NULL) 
-			checked_future_processes = 1;
-
-		while (!checked_future_processes) {
-			/*
-			** Is == and not >= because this would pick up processes that
-			** have already been queued up once and then moved back to disk.
-			** If these were triggered by this, then they would be duplicated
-			** in the queue which is not what we want at all.
-			*/
-			if (check->time_created == timer) {
-				queue_insert(q1, check);
-			}
-			
-			// Testing if we are at the end of the list.
-			if (check->next == NULL) {
-				checked_future_processes = 1;
-			} else {
-				check = check->next;
-			}
-		}
+		check_future_processes(check, q1, timer);
 		
 		/*
 		** Checking if the current queue has expired its quantum.
@@ -321,4 +300,31 @@ memory->num_holes, get_mem_usage(memory));
 	}
 
 	printf("time %d, simulation finished.\n", timer);
+}
+
+void check_future_processes(Process *check, Queue *q1, int timer)
+{
+	int checked_future_processes = 0;
+
+	if (check == NULL) 
+		checked_future_processes = 1;
+
+	while (!checked_future_processes) {
+		/*
+		** Is == and not >= because this would pick up processes that
+		** have already been queued up once and then moved back to disk.
+		** If these were triggered by this, then they would be duplicated
+		** in the queue which is not what we want at all.
+		*/
+		if (check->time_created == timer) {
+			queue_insert(q1, check);
+		}
+		
+		// Testing if we are at the end of the list.
+		if (check->next == NULL) {
+			checked_future_processes = 1;
+		} else {
+			check = check->next;
+		}
+	}
 }
