@@ -131,6 +131,7 @@ void simulate(Process *disk_processes, int num_processes, Memory *memory,
 
 	Queue *q1;
 
+	// Setting up for the given algorithm.
 	int fcfs = 0;
 	if (!strcmp(alg, FCFS)) {
 		fcfs = 1;
