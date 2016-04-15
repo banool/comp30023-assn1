@@ -44,7 +44,7 @@ Process *read_processes(char *target, int memsize, int *num_processes)
         int inp1, inp2, inp3, inp4;
         sscanf(buff, "%d %d %d %d", &inp1, &inp2, &inp3, &inp4);
 
-        if (inp1 < 0 || inp2 <= 0 || inp3 <= 0 || inp4 <= 0) {
+        if (inp1 < 0 || inp2 < 0 || inp3 <= 0 || inp4 <= 0) {
             fprintf(stderr, "Invalid input.\n");
             return NULL;
         }
