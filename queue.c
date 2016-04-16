@@ -48,8 +48,7 @@ Process *queue_pop(Queue *q)
 {
     Process *ret = q->queue[q->start];
     q->queue[q->start] = NULL;
-    int new_start = (q->start + 1) % q->max_size;
-    q->start = new_start;
+    q->start = (q->start + 1) % q->max_size;;
     
     q->num_items -= 1;
     return ret;

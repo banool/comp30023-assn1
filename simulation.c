@@ -11,6 +11,8 @@
 /* Extern declarations: */
 extern char *optarg;
 
+int num_swaps = 0;
+
 void print_usage(char *program_name);
 void simulate(Process *disk_processes, int num_procceses, Memory *memory, 
 	char *alg);
@@ -152,14 +154,16 @@ void simulate(Process *disk_processes, int num_processes, Memory *memory,
 	while(1) {
 
 		check = disk_processes;
-
+		
 		// Checking for any potential processes to be added to the queue.
 		checked_future_processes = 0;
 
-		if (check == NULL) 
+		if (check == NULL)
 			checked_future_processes = 1;
 
 		while (!checked_future_processes) {
+			//diag
+			//printf("checking check->time_created %d\n", check->time_created);
 			/*
 			** Is == and not >= because this would pick up processes that
 			** have already been queued up once and then moved back to disk.
@@ -184,7 +188,11 @@ void simulate(Process *disk_processes, int num_processes, Memory *memory,
 		** multiple queues if the algorithm is multi. 
 		** fcfs doesn't have to worry about this.
 		*/
+		//diag
+		//printf("remainging_q: %d\n", remaining_quantum);
 		if (!fcfs && remaining_quantum == 0) {
+			//diag
+			//printf("reacquiring queue\n");
 			// Figure out which queue is next after the current one.
 			Queue *next_queue = get_next_queue(curr_queue, q1, q2, q3);
 
@@ -195,6 +203,7 @@ void simulate(Process *disk_processes, int num_processes, Memory *memory,
 				// We don't want our process to be looped back into the short
 				// quantum, so we just leave it in the last queue.
 				queue_insert(next_queue, active);
+				active = NULL;
 			}
 			
 			// Round robin into the next queue for this iteration.
@@ -208,7 +217,21 @@ void simulate(Process *disk_processes, int num_processes, Memory *memory,
 			}
 
 			remaining_quantum = curr_queue->quantum;
-			active = NULL;
+		}
+		
+
+		/*
+		** If we get here, it means all the queues are empty. However,
+		** because the block at the end of the script hasn't exited the
+		** loop yet, it means there must still be processes yet to start.
+		** As such, we just increment timer and move to the next interval.
+		*/
+		if (curr_queue->num_items == 0 && active == NULL) {
+			timer += 1;
+			//diag
+			//printf("what the meme\n");
+			remaining_quantum = 0;
+			continue;
 		}
 		
 		/*
@@ -267,8 +290,8 @@ void simulate(Process *disk_processes, int num_processes, Memory *memory,
 					** Doesn't matter where we put it back on disk because
 					** the arrival part won't try to queue up processes that
 					** should have already arrived (arrival time < timer).
-					** As such we just add it to the head of the disk processes
-					** linked list. EDIT TODO we now add it to the tail.
+					** As such we just add it to the tail of the disk processes
+					** linked list. 
 					*/
 					if (disk_processes == NULL) {
 						disk_processes = memory_remove_largest(memory);
@@ -303,14 +326,17 @@ memory->num_holes, get_mem_usage(memory));
 		*/
 		if (active->remaining_time == 0) {
 			// Discard the pointer, we don't need it as the process is done.
+			//diag
+			//printf("process %d done\n", active->process_id);
 			memory_remove(memory, active->process_id);
 			free_process(active);
 			free(active);
 			active = NULL;
 			remaining_quantum = 1;
-
+			
 			// Check if there's anything left in the queue or on disk.
 			// If so, we're done!
+			
 			if (!q1->num_items && !q2->num_items && !q3->num_items && 
 				disk_processes == NULL) {
 				timer += 1;
@@ -322,4 +348,5 @@ memory->num_holes, get_mem_usage(memory));
 	}
 
 	printf("time %d, simulation finished.\n", timer);
+	//printf("num_swaps %d\n", num_swaps);
 }

@@ -112,6 +112,7 @@ int memory_insert(Memory *mem, Process *in, int timer)
 Process *memory_remove_largest(Memory *mem)
 {
     Process *curr = mem->processes;
+    num_swaps += 1;
 
     // Checking for space between each process.
     int id_biggest = curr->process_id;
@@ -119,17 +120,18 @@ Process *memory_remove_largest(Memory *mem)
     int time_inserted = curr->time_inserted_into_mem;
 
     while (curr->next != NULL) {
-        // Checking for a large enough gap.
+        // Checking if this process is larger than the current largest.
         if (curr->next->mem_size > biggest) {
             id_biggest = curr->next->process_id;
             biggest = curr->next->mem_size;
-            time_inserted = curr->time_inserted_into_mem;
+            time_inserted = curr->next->time_inserted_into_mem;
         } else 
         // This means that there is another process that is equally large.
         // As per the spec we select whichever has been in memory longest.
         if (curr->next->mem_size == biggest) {
             if (curr->next->time_inserted_into_mem < time_inserted) {
                 id_biggest = curr->next->process_id;
+                time_inserted = curr->next->time_inserted_into_mem;
             }
         }
         curr = curr->next;
@@ -210,7 +212,7 @@ void memory_count_holes(Memory *mem)
     
     while(1) {
         // Checking for the end of the list.
-        if(curr->next == NULL) 
+        if (curr->next == NULL) 
             break;
         // Checking for holes up until the last process.
         if (curr->start > curr->next->end) 
@@ -248,6 +250,7 @@ int get_mem_usage(Memory *mem)
         }
         curr = curr->next;
     }
-    
-    return ((int)(((double)total_usage/mem->end)*100));
+    int percentage = (total_usage*100)/mem->end;
+    if (total_usage*100 % mem->end != 0) percentage += 1;
+    return percentage;
 }

@@ -1,5 +1,7 @@
 #include "process.h"
 
+extern int num_swaps;
+
 typedef struct Memory_s {
     int start; // Most likely 0.
     int end; // Will be the given memsize;
