@@ -162,8 +162,6 @@ void simulate(Process *disk_processes, int num_processes, Memory *memory,
 			checked_future_processes = 1;
 
 		while (!checked_future_processes) {
-			//diag
-			//printf("checking check->time_created %d\n", check->time_created);
 			/*
 			** Is == and not >= because this would pick up processes that
 			** have already been queued up once and then moved back to disk.
@@ -188,11 +186,7 @@ void simulate(Process *disk_processes, int num_processes, Memory *memory,
 		** multiple queues if the algorithm is multi. 
 		** fcfs doesn't have to worry about this.
 		*/
-		//diag
-		//printf("remainging_q: %d\n", remaining_quantum);
 		if (!fcfs && remaining_quantum == 0) {
-			//diag
-			//printf("reacquiring queue\n");
 			// Figure out which queue is next after the current one.
 			Queue *next_queue = get_next_queue(curr_queue, q1, q2, q3);
 
@@ -219,26 +213,23 @@ void simulate(Process *disk_processes, int num_processes, Memory *memory,
 			remaining_quantum = curr_queue->quantum;
 		}
 		
-
-		/*
-		** If we get here, it means all the queues are empty. However,
-		** because the block at the end of the script hasn't exited the
-		** loop yet, it means there must still be processes yet to start.
-		** As such, we just increment timer and move to the next interval.
-		*/
-		if (curr_queue->num_items == 0 && active == NULL) {
-			timer += 1;
-			//diag
-			//printf("what the meme\n");
-			remaining_quantum = 0;
-			continue;
-		}
-		
 		/*
 		** Deciding which process to run. If there isn't an active process
 		** we will pop the front of the queue and move it off disk into memory.
 		*/
 		if (active == NULL) {
+
+			/*
+			** If we get here, it means all the queues are empty. However,
+			** because the block at the end of the script hasn't exited the
+			** loop yet, it means there must still be processes yet to start.
+			** As such, we just increment timer and move to the next interval.
+			*/
+			if (curr_queue->num_items == 0) {
+				timer += 1;
+				remaining_quantum = 0;
+				continue;
+			}
 
 			// Pop the item from the current queue and mark it as active.
 			active = queue_pop(curr_queue);
@@ -326,8 +317,6 @@ memory->num_holes, get_mem_usage(memory));
 		*/
 		if (active->remaining_time == 0) {
 			// Discard the pointer, we don't need it as the process is done.
-			//diag
-			//printf("process %d done\n", active->process_id);
 			memory_remove(memory, active->process_id);
 			free_process(active);
 			free(active);
