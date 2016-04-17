@@ -1,5 +1,5 @@
+# Daniel Porteous porteousd
 # Makefile
-# Daniel Porteous
 # 2016
 
 OBJ     = simulation.o process.o memory.o queue.o

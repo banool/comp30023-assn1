@@ -1,3 +1,5 @@
+// Daniel Porteous porteousd
+
 #include <stdlib.h>
 #include <assert.h>
 #include "memory.h"
@@ -112,8 +114,7 @@ int memory_insert(Memory *mem, Process *in, int timer)
 Process *memory_remove_largest(Memory *mem)
 {
     Process *curr = mem->processes;
-    num_swaps += 1;
-
+    
     // Checking for space between each process.
     int id_biggest = curr->process_id;
     int biggest = curr->mem_size;

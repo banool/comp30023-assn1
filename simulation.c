@@ -1,3 +1,5 @@
+// Daniel Porteous porteousd
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -324,8 +326,7 @@ memory->num_holes, get_mem_usage(memory));
 			remaining_quantum = 1;
 			
 			// Check if there's anything left in the queue or on disk.
-			// If so, we're done!
-			
+			// If not, we're done!
 			if (!q1->num_items && !q2->num_items && !q3->num_items && 
 				disk_processes == NULL) {
 				timer += 1;
@@ -337,5 +338,4 @@ memory->num_holes, get_mem_usage(memory));
 	}
 
 	printf("time %d, simulation finished.\n", timer);
-	//printf("num_swaps %d\n", num_swaps);
 }

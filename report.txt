@@ -1,0 +1,94 @@
+Daniel Porteous porteousd
+
+This report investigates how different factors affect the number of swaps
+made throughout simulation duration. All tests use multi because fcfs wouldn't 
+reveal much considering only one process would be loaded into memory at a time.
+
+This table displays the number of swaps to disk at different max memory sizes.
+Each test has 100 processes of random size (between 1 and maximum memory size)
+and time duration. 1000 tests are then run to compute the average. 
+
+Table 1: Max memory size vs. Average number of swaps
+----------------------------------------------------
+MaxMemory:     8. AverageSwaps: 189.677
+MaxMemory:    16. AverageSwaps: 190.066
+MaxMemory:    32. AverageSwaps: 189.724
+MaxMemory:    64. AverageSwaps: 189.646
+MaxMemory:   128. AverageSwaps: 190.092
+MaxMemory:   256. AverageSwaps: 189.806
+MaxMemory:   512. AverageSwaps: 189.410
+MaxMemory:  1024. AverageSwaps: 189.650
+MaxMemory:  2048. AverageSwaps: 189.676
+MaxMemory:  4096. AverageSwaps: 189.914
+MaxMemory:  8192. AverageSwaps: 189.277
+MaxMemory: 16384. AverageSwaps: 189.791
+
+It is fairly obvious that average swap number is not affected with an increase
+in MaxMemory. This is hardly surprising however because the process sizes are 
+scaling with memory and on average will be about half the size of max memory.
+
+For further variation, the size of each process relative to max memory size can
+be tested, for which a modifier variable is added. This modifier indicates the 
+maximum proportion of MaxMemory that a process can take up.
+
+E.g. Modifier = 0.2 and MaxMemory = 100 means max process size = 20
+
+This test has a fixed MaxMemory of 2048. The processes' size scale between
+0.05 of max memory by 0.05 increments upto 1 of max memory.
+
+Table 2: Process size as proportion of memory vs. Average number of swaps
+-------------------------------------------------------------------------
+AverageSwaps: 69.2340. Modifier: 0.05. Ratio 1384.68
+AverageSwaps: 111.995. Modifier: 0.10. Ratio 1119.95
+AverageSwaps: 131.748. Modifier: 0.15. Ratio  878.32
+AverageSwaps: 142.922. Modifier: 0.20. Ratio  714.61
+AverageSwaps: 150.985. Modifier: 0.25. Ratio  603.94
+AverageSwaps: 156.931. Modifier: 0.30. Ratio  523.10
+AverageSwaps: 161.607. Modifier: 0.35. Ratio  461.73
+AverageSwaps: 165.565. Modifier: 0.40. Ratio  413.91
+AverageSwaps: 168.444. Modifier: 0.45. Ratio  374.32
+AverageSwaps: 171.751. Modifier: 0.50. Ratio  343.50
+AverageSwaps: 174.480. Modifier: 0.55. Ratio  317.24
+AverageSwaps: 178.603. Modifier: 0.60. Ratio  297.67
+AverageSwaps: 180.162. Modifier: 0.65. Ratio  277.17
+AverageSwaps: 182.302. Modifier: 0.70. Ratio  260.43
+AverageSwaps: 185.007. Modifier: 0.75. Ratio  246.68
+AverageSwaps: 186.151. Modifier: 0.80. Ratio  232.69
+AverageSwaps: 187.119. Modifier: 0.85. Ratio  220.14
+AverageSwaps: 188.452. Modifier: 0.90. Ratio  209.39
+AverageSwaps: 188.833. Modifier: 0.95. Ratio  198.77
+AverageSwaps: 189.495. Modifier: 1.00. Ratio  189.50
+
+Unsurprisingly, as process size increases so does the number of swaps.
+This makes sense because a large process needs more memory and therefore 
+needs more processes to be swapped out to have it fit.
+
+More interestingly however, the ratio of AverageSwaps over the Modifier
+decreases with greater process size. Inversely, this means that as processes
+get smaller and smaller, the number of swaps decreases disproportionally more. 
+
+This indicates that that having either/both
+    1. Large memory
+    2. Small processes
+such that processes are small compared to max memory size makes a 
+proportionally more significant impact on how efficiently memory is used.
+
+An upside to these results is that as average swaps increases, it seems 
+to exponentially decay. This means that there is an upper band to how bad
+thrashing can occur. On the other hand, it seems like the biggest loss in 
+performance loss is early on as processes start to increase in size. As such,
+focus should be put on keeping processes as small as possible.
+
+A way to create this kind of scenario could involve abstracting processes
+into as a small chunks as possible, resulting in smaller (and likely shorter)
+individual units of work. The alternative to software based solutions that
+try to create small processes is to increase memory. However, advising to just 
+increase memory in the system is a bit remiss, and trying to create processes
+sized around 5-10% of main memory is potentially unrealistic.
+
+As such, better scheduling algorithms, that avoid memory reaching full load
+as much as possible, such as perhaps tweaking quantum times/number of queues,
+would help to alleviate the issue, though full memory usage is obviously
+unavoidable sometimes.
+
+Words: 474 (not including results tables)

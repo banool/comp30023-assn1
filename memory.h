@@ -1,6 +1,6 @@
-#include "process.h"
+// Daniel Porteous porteousd
 
-extern int num_swaps;
+#include "process.h"
 
 typedef struct Memory_s {
     int start; // Most likely 0.
