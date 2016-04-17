@@ -2,7 +2,13 @@
 Assignment 1 for COMP30023 - Computer Systems, a scheduler and memory manager.
 
 ## Overview
-talk about the two linked lists and queues. talk about the alg for process scheduling. talk about the alg used for inserting into mem.
+This is assignment 1 for the unimelb subject COMP30023 - Computer Systems, a scheduler and memory manager.
+
+The basic implementation involves simulating handling incoming processes and dealing with how they are put into memory, swapped to disk and scheduled using various algorithms, specifically first come first serve and a multi level feedback queue.
+
+Each process has a struct. Memory and the disk are represented as doubly linked lists of processes. A process can only exist on one at a time.
+A queue is a cyclical array of pointers to processes. Depending on the algorithm, there is either 1 queue (fcfs) or 3 queues with different quantums (multi).
+The simulation provides support for reading in processes, running them based on the scheduling algorithm, moving processes into memory (including algorithms for freeing space when required), swapping processes between disk and memory, and terminating processes once finished appropriately.
 
 ## Directory structure
 
@@ -13,6 +19,8 @@ The root directory has the code, including makefile, this readme, the spec and s
 - matt_test contains all the appropriate input and output files for matt_test.sh, as supplied by Matt Farrugia.
 - old_output contains everything else. This is all non-essential to the project and was made purely for initial diagnostic purposes while writing the code, including discarded test cases and half written code.
 
+## Results
 
+Once I get my results back for this assignment, I will post the result so as to provide an indication of its quality.
 
 
