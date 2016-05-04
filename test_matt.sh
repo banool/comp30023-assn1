@@ -1,5 +1,6 @@
 #!/bin/bash
-make
+
+#make
 mkdir -p test_matt/out
 cd test_matt/in/
 for file in *.txt
@@ -14,7 +15,7 @@ done
 cd ../out/
 for file in *.txt
 do
-    diff -q $file ../matt_out/$file
+    diff $file ../matt_out/$file
 done
 cd ../../
-make clean
+#make clean

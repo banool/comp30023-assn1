@@ -1,0 +1,7 @@
+Projects have been run with:
+./simulation -f filename.txt -a algorithmname -m memorysize > temporaryfile.out
+
+The first three test cases are run with fcfs and memory sizes 100/100/25
+The remaining seven test cases are run with multi and memory sizes 100/150/160/400/100/16384/1000
+
+The temporaryfile.out is then compared with the corresponding sameple output file with the diff command. Test cases are attached.

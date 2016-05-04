@@ -1,6 +1,6 @@
 #!/bin/bash
 
-make
+#make
 cd partA_cases
 ../simulation -f specInput.txt -m 100 -a multi > out.txt
 diff out.txt specOutput-multi-100.txt
@@ -15,4 +15,4 @@ diff out.txt tang_out_multi.txt
 diff out.txt tang_out_fcfs.txt
 rm out.txt
 cd ..
-make clean
+#make clean
