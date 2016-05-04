@@ -23,5 +23,13 @@ The root directory has the code, including makefile, this readme, the spec and s
 
 Once I get my results back for this assignment, I will post the result so as to provide an indication of its quality.
 
-**Update:** 15/15 "Excellent work!".
+### Update
+Final result: 15/15
+
+Part A: 12
+Part B: 3
+Tests passed: 10
+Tests failed: 0
+Code comments: Excellent work!
+Report comments: The idea was very clear, and conclusions were well-supported. Excellent!
 
