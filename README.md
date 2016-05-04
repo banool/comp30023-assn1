@@ -12,24 +12,27 @@ The simulation provides support for reading in processes, running them based on 
 
 ## Directory structure
 
-The root directory has the code, including makefile, this readme, the spec and some bash scripts to run the test cases. It also contains the final report for part B.
+The root directory has all the code, including makefile, this readme, the spec and a bash script to run the test cases. It also contains the final report for part B.
 
-- partA_cases contains all the input cases created for writing the initial project. These include the given test case, specInput (along with its appropriate output for the two algorithms) as well as additional tests for testing certain edge cases.
-- partB_cases contains input cases and all other files relevant to part B, excluding the final report which is in the base directory.
-- matt_test contains all the appropriate input and output files for matt_test.sh, as supplied by Matt Farrugia.
-- old_output contains everything else. This is all non-essential to the project and was made purely for initial diagnostic purposes while writing the code, including discarded test cases and half written code.
+- **tests** contains all the files related to testing the program except for the
+top level testing script, test_all.sh. At the root of this folder are other bash scripts specific to the following folders.
+	- **partA_cases** contains all the input cases created for writing the initial project. These include the given test case, specInput (along with its appropriate output for the two algorithms) as well as additional tests for testing certain edge cases.
+	- **partB_cases** contains input cases and all other files relevant to part B, excluding the final report which is in the base directory.
+	- **matt\_test** contains all the appropriate input and output files for matt_test.sh, as supplied by Matt Farrugia.
+	- **final\_tests\_datafiles** contains the final test cases used by the markers. The bash script test\_final.sh operates on these.
+- **old_output** contains everything else. This is all non-essential to the project and was made purely for initial diagnostic purposes while writing the code, including discarded test cases and half written code.
 
 ## Results
 
 Once I get my results back for this assignment, I will post the result so as to provide an indication of its quality.
 
 ### Update
-Final result: 15/15
+Final result: 15/15.
 
 Part A: 12
 Part B: 3
 Tests passed: 10
 Tests failed: 0
 Code comments: Excellent work!
-Report comments: The idea was very clear, and conclusions were well-supported. Excellent!
+Report comments: The idea was very clear, and conclusions were well-supported.Excellent!
 
