@@ -34,5 +34,4 @@ Part B: 3
 Tests passed: 10
 Tests failed: 0
 Code comments: Excellent work!
-Report comments: The idea was very clear, and conclusions were well-supported.Excellent!
-
+Report comments: The idea was very clear, and conclusions were well-supported. Excellent!
